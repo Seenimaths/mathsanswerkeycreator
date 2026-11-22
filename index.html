@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#312e81" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Maths Key Studio" />
+  <title>Maths Answer Key Studio — PWA, MathJax, Tamil &amp; English A4 Print</title>
+
+  <!-- PWA Manifest (for GitHub Pages Address-Bar Install) -->
+  <link id="pwa-manifest-link" rel="manifest" href="./manifest.json" />
+
+  <!-- Fonts: Inter (UI), Noto Serif Tamil (Tamil Exam Key), JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- MathJax v3 SVG (Self-contained glyphs for crisp A4 Print & PDF) -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+        packages: { '[+]': ['ams'] }
+      },
+      svg: {
+        fontCache: 'none'
+      },
+      startup: {
+        typeset: false
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+
+  <!-- Math.js -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@13.2.0/lib/browser/math.min.js"></script>
+
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- Tesseract.js -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+
+    /* Official Exam Sheet Fonts: Cambria Math / Times New Roman (English) + Noto Serif Tamil (Tamil) */
+    .exam-font-en {
+      font-family: 'Cambria Math', 'Cambria', 'Times New Roman', Times, 'Noto Serif Tamil', serif;
+    }
+    .exam-font-ta {
+      font-family: 'Noto Serif Tamil', 'Cambria Math', 'Times New Roman', serif;
+    }
+
+    /* Official DGE Part-Wise Marking Scheme Table — Strictly Contained Within A4 Safe Width */
+    .dge-table {
+      width: 100%;
+      max-width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin-bottom: 18px;
+    }
+    .dge-table th,
+    .dge-table td {
+      border: 1px solid #1e293b;
+      vertical-align: top;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
+    }
+    .dge-table thead th {
+      background-color: #f8fafc;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 7px 6px;
+      text-align: center;
+      border-bottom: 2px solid #0f172a;
+    }
+    .dge-table tbody td {
+      background-color: #ffffff;
+      padding: 6px 8px;
+    }
+
+    .xy-mini-table {
+      border-collapse: collapse;
+      margin: 5px 0;
+      font-size: 11px;
+      max-width: 100%;
+    }
+    .xy-mini-table td, .xy-mini-table th {
+      border: 1px solid #475569 !important;
+      padding: 2px 5px !important;
+      text-align: center !important;
+      min-width: 22px;
+    }
+    .xy-mini-table th {
+      background: #f1f5f9 !important;
+      font-weight: 700;
+    }
+
+    /* MathJax SVG Responsive Fit — NEVER clips past right A4 margin */
+    mjx-container {
+      display: inline-flex !important;
+      align-items: center;
+      vertical-align: middle;
+      max-width: 100% !important;
+      margin: 0 1px !important;
+    }
+    mjx-container svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    /* A4 Paper Visual Card on Screen */
+    .paper-sheet {
+      background: #ffffff;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06);
+      border: 1px solid #cbd5e1;
+      width: 100%;
+      max-width: 210mm;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .part-block {
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 1023px) {
+      .mobile-panel-hidden {
+        display: none;
+      }
+    }
+
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+
+    /* =====================================================================
+       DEFAULT A4 PORTRAIT PRINT STYLESHEET — ZERO MARGIN CUT-OUT & ZERO BLANK PAGE
+       ===================================================================== */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 15mm 14mm 15mm 14mm;
+      }
+      html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      #workspace-grid {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #preview-column,
+      #preview-column.mobile-panel-hidden,
+      #preview-column.hidden {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #answer-key-sheet {
+        display: block !important;
+        visibility: visible !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #ffffff !important;
+        font-size: 10.5pt !important;
+        line-height: 1.42 !important;
+      }
+      .overflow-x-auto {
+        overflow: visible !important;
+      }
+      .dge-table {
+        width: 100% !important;
+        max-width: 100% !important;
+        font-size: 10pt !important;
+        page-break-inside: auto;
+      }
+      .dge-table thead {
+        display: table-header-group;
+      }
+      .dge-table tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .dge-table th,
+      .dge-table td {
+        border: 1px solid #000000 !important;
+        padding: 5px 6px !important;
+      }
+      mjx-container svg {
+        max-width: 100% !important;
+        height: auto !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Navigation Bar -->
+  <header class="no-print sticky top-0 z-30 bg-slate-950 text-white border-b border-slate-800 shadow-md">
+    <div class="max-w-[1640px] mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-700 flex items-center justify-center shadow-inner shrink-0">
+          <i data-lucide="sigma" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <h1 class="text-sm sm:text-base font-bold tracking-tight leading-none">Maths Answer Key Studio</h1>
+            <span id="pattern-badge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              100 Marks
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-0.5 hidden sm:block">A4 Print-Safe MathJax • Tamil &amp; English • Installable PWA</p>
+        </div>
+      </div>
+
+      <!-- Language Toggle (English / தமிழ்) + Pattern Toggle (100M / 50M) -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center bg-slate-900 p-0.5 rounded-lg border border-slate-700 text-xs" title="Switch Answer Key Language">
+          <button id="btn-lang-en" type="button" class="px-2.5 py-1 rounded-md font-semibold bg-brand-600 text-white transition">English</button>
+          <button id="btn-lang-ta" type="button" class="px-2.5 py-1 rounded-md font-semibold text-slate-300 hover:text-white transition">தமிழ்</button>
+        </div>
+
+        <div class="hidden md:flex items-center bg-slate-900 p-0.5 rounded-lg border border-slate-700 text-xs">
+          <button id="btn-mode-100" type="button" class="px-2.5 py-1 rounded-md font-semibold bg-brand-600 text-white transition">100M</button>
+          <button id="btn-mode-50" type="button" class="px-2.5 py-1 rounded-md font-semibold text-slate-300 hover:text-white transition">50M</button>
+        </div>
+      </div>
+
+      <!-- Primary Actions + PWA Install Button -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button id="btn-install-pwa" type="button" class="hidden inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-sm transition">
+          <i data-lucide="smartphone-charging" class="w-3.5 h-3.5"></i>
+          <span>Install App</span>
+        </button>
+        <button id="btn-top-edit-header" type="button" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-amber-200 border border-slate-700 transition">
+          <i data-lucide="pen-line" class="w-3.5 h-3.5"></i>
+          <span class="hidden lg:inline">Edit Header</span>
+        </button>
+        <button id="btn-export-html" type="button" title="Download Standalone HTML" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <i data-lucide="file-code" class="w-3.5 h-3.5"></i>
+          <span class="hidden xl:inline">HTML</span>
+        </button>
+        <button id="btn-export-json" type="button" title="Save Project JSON" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <i data-lucide="save" class="w-3.5 h-3.5"></i>
+          <span class="hidden xl:inline">Save</span>
+        </button>
+        <button id="btn-download-pdf" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>Download PDF</span>
+        </button>
+        <button id="btn-print-key" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-500 text-white shadow-sm transition">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span>Print A4</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Switcher -->
+  <div class="no-print lg:hidden bg-white border-b border-slate-200 px-3 py-2 flex gap-2">
+    <button id="mobile-tab-builder" type="button" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 transition">
+      1. Bulk Upload &amp; AI
+    </button>
+    <button id="mobile-tab-preview" type="button" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-brand-600 text-white transition">
+      2. A4 Key (<span id="mobile-q-badge">0</span>)
+    </button>
+  </div>
+
+  <!-- Main Workspace -->
+  <main id="workspace-grid" class="flex-1 max-w-[1640px] w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+    <!-- LEFT PANEL -->
+    <aside id="builder-column" class="no-print mobile-panel-hidden lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+
+      <!-- Card 1: AI Engine Selector -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-4 py-2.5 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
+            <span class="text-xs font-bold tracking-wide uppercase">Math Extraction &amp; AI Solver Engine</span>
+          </div>
+          <span id="engine-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300">Ready</span>
+        </div>
+
+        <div class="p-3.5 space-y-2.5 text-xs">
+          <div>
+            <label for="ai-provider" class="block font-semibold text-slate-700 mb-1">Choose Model (Open-Source / Free Vision)</label>
+            <select id="ai-provider" class="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-xs font-medium bg-white text-slate-800 focus:ring-2 focus:ring-brand-500 outline-none">
+              <option value="offline">Built-in Offline Math Engine + Smart LaTeX Normalizer (No Key)</option>
+              <option value="gemini">Google Gemini 2.5 Flash — Free Vision Photo OCR + Math Solver</option>
+              <option value="openrouter-deepseek">OpenRouter Free — DeepSeek R1 / V3 (Open-Source Math Solver)</option>
+              <option value="openrouter-gemma">OpenRouter Free — Gemma 3 27B Vision (Google Open-Source)</option>
+              <option value="openrouter-qwen-vl">OpenRouter Free — Qwen 2.5 VL 72B (Vision Math OCR)</option>
+              <option value="deepseek">DeepSeek Official API — DeepSeek-Reasoner (R1)</option>
+            </select>
+          </div>
+
+          <div id="api-key-box" class="hidden space-y-2 pt-1">
+            <div class="flex gap-1.5">
+              <input id="ai-api-key" type="password" placeholder="Paste API Key (saved locally in browser only)" class="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 outline-none" />
+              <button id="btn-save-key" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shrink-0">Save</button>
+            </div>
+            <p id="provider-hint" class="text-[11px] text-slate-500 leading-snug"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Bulk Multi-Photo / PDF Upload & Tabs -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="grid grid-cols-3 border-b border-slate-200 bg-slate-50 text-xs font-semibold">
+          <button type="button" data-panel-tab="upload" class="panel-tab-btn py-2.5 px-2 text-center border-b-2 border-brand-600 text-brand-700 bg-white flex items-center justify-center gap-1.5">
+            <i data-lucide="images" class="w-3.5 h-3.5"></i> Bulk Upload
+          </button>
+          <button type="button" data-panel-tab="add" class="panel-tab-btn py-2.5 px-2 text-center border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Q
+          </button>
+          <button type="button" data-panel-tab="settings" class="panel-tab-btn py-2.5 px-2 text-center border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> Scheme
+          </button>
+        </div>
+
+        <!-- TAB 1: BULK MULTI-IMAGE & PDF UPLOAD -->
+        <div id="tab-content-upload" class="p-4 space-y-3.5">
+          <div id="drop-zone" class="relative border-2 border-dashed border-brand-300 hover:border-brand-600 bg-brand-50/30 hover:bg-brand-50/70 rounded-xl p-4 text-center transition cursor-pointer">
+            <input id="file-input" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.md,.json" class="hidden" />
+            <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center mx-auto mb-2">
+              <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+            </div>
+            <p class="text-xs sm:text-sm font-bold text-slate-800">Upload Multiple Photos (2–10 Pages) or PDF</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Generates Answer Key in selected language (English / தமிழ்)</p>
+            <div class="mt-2.5 flex items-center justify-center gap-2 flex-wrap">
+              <button id="btn-browse-file" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm">
+                <i data-lucide="images" class="w-3.5 h-3.5"></i> Add Photos / PDF
+              </button>
+              <button id="btn-clear-queue" type="button" class="hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-300 text-slate-600 hover:text-rose-600">
+                Clear Queue
+              </button>
+            </div>
+          </div>
+
+          <!-- Bulk Page Thumbnail Queue -->
+          <div id="page-queue-wrap" class="hidden space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-700">Uploaded Pages Queue (<span id="queue-count">0</span>)</span>
+              <span class="text-[11px] text-slate-400">Processes in page order</span>
+            </div>
+            <div id="page-queue-list" class="flex gap-2 overflow-x-auto pb-1.5"></div>
+            <button id="btn-process-queue" type="button" class="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-sm transition">
+              <i data-lucide="wand-2" class="w-4 h-4"></i>
+              Extract Math &amp; Auto-Solve All Pages
+            </button>
+          </div>
+
+          <!-- Progress Bar -->
+          <div id="extract-progress-wrap" class="hidden bg-brand-50 border border-brand-200 rounded-lg p-3">
+            <div class="flex items-center justify-between text-xs font-semibold text-brand-900 mb-1.5">
+              <span id="extract-status-text">Processing pages...</span>
+              <span id="extract-pct-text">0%</span>
+            </div>
+            <div class="w-full h-2 bg-brand-200 rounded-full overflow-hidden">
+              <div id="extract-progress-bar" class="h-full bg-brand-600 transition-all duration-200" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Quick Blueprint Presets -->
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" data-sample="public100" class="sample-btn px-2.5 py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-brand-50 text-slate-800 hover:text-brand-800 border border-slate-200 hover:border-brand-300 transition text-left">
+              <div class="font-bold">10th Public (100M)</div>
+              <div class="text-[10px] text-slate-500">Part I–IV • 44 Qs</div>
+            </button>
+            <button type="button" data-sample="model50" class="sample-btn px-2.5 py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-emerald-50 text-slate-800 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 transition text-left">
+              <div class="font-bold">10th Model (50M)</div>
+              <div class="text-[10px] text-slate-500">Part I–IV • 22 Qs</div>
+            </button>
+          </div>
+
+          <!-- Bulk Questions Textbox + Math-Mode Fixer -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label for="raw-paper-input" class="text-xs font-bold text-slate-700">Bulk Extracted / Pasted Questions</label>
+              <div class="flex items-center gap-2">
+                <button id="btn-fix-math-mode" type="button" title="Convert 2x2 -> $2x^2$, fractions, roots into MathJax" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 text-[10.5px] font-bold transition">
+                  <i data-lucide="sigma" class="w-3 h-3"></i> Fix Math Mode
+                </button>
+                <button id="btn-clear-raw" type="button" class="text-[11px] text-slate-400 hover:text-rose-600">Clear</button>
+              </div>
+            </div>
+            <textarea id="raw-paper-input" rows="6" placeholder="Paste bulk questions or let Bulk Upload extract them here..." class="w-full rounded-xl border border-slate-300 p-2.5 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-brand-500 outline-none resize-y"></textarea>
+
+            <div id="math-preview-box" class="hidden rounded-lg bg-slate-50 border border-slate-200 p-2.5 text-xs space-y-1 max-h-36 overflow-y-auto">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-brand-700">Live MathJax Preview:</div>
+              <div id="math-preview-content" class="text-slate-800 leading-relaxed space-y-1"></div>
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <button id="btn-extract-solve" type="button" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition">
+              <i data-lucide="cpu" class="w-4 h-4"></i>
+              Solve &amp; Build Answer Key
+            </button>
+            <button id="btn-append-solve" type="button" title="Append to existing table" class="inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition">
+              <i data-lucide="list-plus" class="w-4 h-4"></i> Append
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB 2: ADD SINGLE QUESTION -->
+        <div id="tab-content-add" class="hidden p-4 space-y-3">
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label for="add-part" class="block text-xs font-semibold text-slate-700 mb-1">Part</label>
+              <select id="add-part" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs bg-white focus:ring-2 focus:ring-brand-500 outline-none">
+                <option value="PART-I">PART-I (1 Mark MCQ)</option>
+                <option value="PART-II">PART-II (2 Marks)</option>
+                <option value="PART-III">PART-III (5 Marks)</option>
+                <option value="PART-IV">PART-IV (8 Marks)</option>
+              </select>
+            </div>
+            <div>
+              <label for="add-qno" class="block text-xs font-semibold text-slate-700 mb-1">Q. No.</label>
+              <input id="add-qno" type="text" placeholder="e.g. 45" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <label for="add-question-text" class="block text-xs font-semibold text-slate-700 mb-1">Maths Question</label>
+            <textarea id="add-question-text" rows="4" placeholder="e.g., Solve 2x^2 - 7x + 3 = 0" class="w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:ring-2 focus:ring-brand-500 outline-none"></textarea>
+          </div>
+
+          <button id="btn-add-single-q" type="button" class="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Auto-Solve &amp; Add to Part
+          </button>
+        </div>
+
+        <!-- TAB 3: SCHEME, LANGUAGE & HEADER -->
+        <div id="tab-content-settings" class="hidden p-4 space-y-3">
+          <div class="grid grid-cols-2 gap-2">
+            <button id="btn-side-100" type="button" class="py-2 rounded-lg text-xs font-bold bg-brand-600 text-white border border-brand-700">100 Mark Scheme</button>
+            <button id="btn-side-50" type="button" class="py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200">50 Mark Scheme</button>
+          </div>
+
+          <div>
+            <label for="meta-school" class="block text-xs font-semibold text-slate-700 mb-1">School / Board Heading</label>
+            <input id="meta-school" type="text" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 outline-none" />
+          </div>
+          <div>
+            <label for="meta-exam" class="block text-xs font-semibold text-slate-700 mb-1">Exam Name</label>
+            <input id="meta-exam" type="text" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 outline-none" />
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label for="meta-subject" class="block text-xs font-semibold text-slate-700 mb-1">Subject</label>
+              <input id="meta-subject" type="text" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 outline-none" />
+            </div>
+            <div>
+              <label for="meta-medium" class="block text-xs font-semibold text-slate-700 mb-1">Medium</label>
+              <input id="meta-medium" type="text" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 outline-none" />
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-200 space-y-2">
+            <p class="text-xs font-semibold text-slate-700">Table Display Options</p>
+            <label class="flex items-center justify-between text-xs text-slate-700 cursor-pointer">
+              <span>Show Question Text Above Answer</span>
+              <input id="opt-show-qtext" type="checkbox" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+            </label>
+            <label class="flex items-center justify-between text-xs text-slate-700 cursor-pointer">
+              <span>Show Step Marks Column (Parts II–IV)</span>
+              <input id="opt-show-step-marks" type="checkbox" checked class="rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Part-Wise Summary -->
+      <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-sm border border-slate-800">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-brand-200">Part-Wise Marks</span>
+          <span id="summary-total-pill" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300">100 Marks</span>
+        </div>
+        <div id="part-summary-list" class="space-y-1.5 text-xs"></div>
+      </div>
+    </aside>
+
+    <!-- RIGHT PANEL: A4 PRINT-SAFE ANSWER KEY SHEET -->
+    <section id="preview-column" class="lg:col-span-7 xl:col-span-8 flex flex-col gap-3">
+
+      <!-- Toolbar -->
+      <div class="no-print bg-white rounded-xl border border-slate-200 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2 shadow-sm">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button type="button" data-part-filter="ALL" class="part-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900 text-white transition">All Parts</button>
+          <button type="button" data-part-filter="PART-I" class="part-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Part I (1M)</button>
+          <button type="button" data-part-filter="PART-II" class="part-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Part II (2M)</button>
+          <button type="button" data-part-filter="PART-III" class="part-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Part III (5M)</button>
+          <button type="button" data-part-filter="PART-IV" class="part-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Part IV (8M)</button>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <input id="search-questions" type="text" placeholder="Search Q.No / Math..." class="px-2.5 py-1 rounded-lg border border-slate-300 text-xs w-36 sm:w-44 focus:ring-2 focus:ring-brand-500 outline-none" />
+          <button id="btn-clear-all" type="button" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- PRINTABLE A4 ANSWER KEY SHEET (Cambria Math / Times New Roman + Noto Serif Tamil) -->
+      <div id="answer-key-sheet" class="paper-sheet exam-font-en rounded-2xl p-6 sm:p-8">
+
+        <!-- Header -->
+        <div class="text-center border-b-2 border-slate-900 pb-3 mb-4">
+          <div class="flex items-center justify-center gap-2 flex-wrap">
+            <p id="preview-school" class="text-xs sm:text-sm font-bold uppercase tracking-wide text-slate-900"></p>
+            <button id="btn-sheet-edit-header" type="button" class="no-print font-sans inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 transition">
+              <i data-lucide="pencil" class="w-3 h-3"></i> Edit School / Exam Name
+            </button>
+          </div>
+          <h2 id="preview-exam" class="text-base sm:text-lg font-bold uppercase text-slate-900 mt-1"></h2>
+          <p id="preview-key-label" class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 mt-0.5">ANSWER KEY</p>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 mt-2.5 pt-2 border-t border-slate-400 text-xs sm:text-[13px] font-bold text-slate-900">
+            <div><span id="lbl-subject">SUBJECT</span> : <span id="preview-subject"></span></div>
+            <div><span id="lbl-max-marks">MAXIMUM MARKS</span> : <span id="preview-max-marks"></span></div>
+            <div><span id="lbl-medium">MEDIUM</span> : <span id="preview-medium"></span></div>
+          </div>
+        </div>
+
+        <!-- Part-Wise Tables -->
+        <div id="parts-container"></div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden py-12 text-center font-sans">
+          <p class="text-sm font-semibold text-slate-700">No questions in this Answer Key yet</p>
+          <p class="text-xs text-slate-500 mt-1">Upload multiple question paper photos or a PDF on the left to generate automatically.</p>
+        </div>
+
+        <div class="text-center text-xs font-bold tracking-widest text-slate-600 mt-3">*****</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal 1: Edit School Heading & Exam Name -->
+  <div id="header-modal" class="no-print hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden">
+      <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="building-2" class="w-4 h-4 text-brand-300"></i>
+          <h3 class="text-sm font-bold">Edit School Heading &amp; Exam Title</h3>
+        </div>
+        <button id="btn-close-header-modal" type="button" class="p-1 rounded-lg hover:bg-slate-800 text-slate-300">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="p-5 space-y-3 text-xs">
+        <div>
+          <label for="hm-school" class="block font-semibold text-slate-700 mb-1">School / Board Heading</label>
+          <input id="hm-school" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-brand-500 outline-none" />
+        </div>
+        <div>
+          <label for="hm-exam" class="block font-semibold text-slate-700 mb-1">Exam Name</label>
+          <input id="hm-exam" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-brand-500 outline-none" />
+        </div>
+        <div class="grid grid-cols-3 gap-2.5">
+          <div>
+            <label for="hm-subject" class="block font-semibold text-slate-700 mb-1">Subject</label>
+            <input id="hm-subject" type="text" class="w-full rounded-lg border border-slate-300 px-2.5 py-2 focus:ring-2 focus:ring-brand-500 outline-none" />
+          </div>
+          <div>
+            <label for="hm-medium" class="block font-semibold text-slate-700 mb-1">Medium</label>
+            <input id="hm-medium" type="text" class="w-full rounded-lg border border-slate-300 px-2.5 py-2 focus:ring-2 focus:ring-brand-500 outline-none" />
+          </div>
+          <div>
+            <label for="hm-max-marks" class="block font-semibold text-slate-700 mb-1">Max Marks</label>
+            <select id="hm-max-marks" class="w-full rounded-lg border border-slate-300 px-2.5 py-2 bg-white focus:ring-2 focus:ring-brand-500 outline-none">
+              <option value="100">100</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button id="btn-cancel-header-modal" type="button" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100">Cancel</button>
+        <button id="btn-save-header-modal" type="button" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm">Save Header</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Edit Row with Live MathJax Preview -->
+  <div id="edit-modal" class="no-print hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="edit-3" class="w-4 h-4 text-brand-300"></i>
+          <h3 class="text-sm font-bold">Edit Answer Key Entry (MathJax Mode)</h3>
+        </div>
+        <button id="btn-close-modal" type="button" class="p-1 rounded-lg hover:bg-slate-800 text-slate-300">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-3.5 text-xs">
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label for="edit-qno" class="block font-semibold text-slate-700 mb-1">Q. No.</label>
+            <input id="edit-qno" type="text" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 focus:ring-2 focus:ring-brand-500 outline-none" />
+          </div>
+          <div>
+            <label for="edit-part" class="block font-semibold text-slate-700 mb-1">Part</label>
+            <select id="edit-part" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 bg-white focus:ring-2 focus:ring-brand-500 outline-none">
+              <option value="PART-I">PART-I (1M)</option>
+              <option value="PART-II">PART-II (2M)</option>
+              <option value="PART-III">PART-III (5M)</option>
+              <option value="PART-IV">PART-IV (8M)</option>
+            </select>
+          </div>
+          <div>
+            <label for="edit-total-marks" class="block font-semibold text-slate-700 mb-1">Total Marks</label>
+            <input id="edit-total-marks" type="number" step="0.5" min="1" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-bold text-brand-700 outline-none" />
+          </div>
+        </div>
+
+        <div id="edit-mcq-fields" class="hidden grid grid-cols-3 gap-3">
+          <div>
+            <label for="edit-opt-code" class="block font-semibold text-slate-700 mb-1">Option Code</label>
+            <input id="edit-opt-code" type="text" placeholder="(a) / (அ)" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 outline-none" />
+          </div>
+          <div class="col-span-2">
+            <label for="edit-key-ans" class="block font-semibold text-slate-700 mb-1">Key Answer (wrap math in $...$)</label>
+            <input id="edit-key-ans" type="text" class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 outline-none" />
+          </div>
+        </div>
+
+        <div id="edit-steps-wrap" class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="font-semibold text-slate-700">Answer Lines &amp; Step Marks</label>
+            <button id="btn-modal-add-step" type="button" class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold bg-brand-50 text-brand-700 hover:bg-brand-100 border border-brand-200">
+              <i data-lucide="plus" class="w-3 h-3"></i> Add Line
+            </button>
+          </div>
+          <div id="edit-steps-list" class="space-y-2"></div>
+        </div>
+
+        <div id="edit-live-mathjax" class="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-1"></div>
+
+        <div>
+          <label for="edit-question" class="block font-semibold text-slate-700 mb-1">Question Text (optional reference)</label>
+          <textarea id="edit-question" rows="2" class="w-full rounded-lg border border-slate-300 p-2 outline-none"></textarea>
+        </div>
+      </div>
+
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button id="btn-cancel-modal" type="button" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100">Cancel</button>
+        <button id="btn-save-modal" type="button" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div id="confirm-modal" class="no-print hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl border border-slate-200 max-w-sm w-full p-5 space-y-4">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 id="confirm-title" class="text-sm font-bold text-slate-900">Confirm Action</h3>
+          <p id="confirm-msg" class="text-xs text-slate-600 mt-1"></p>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button id="confirm-cancel-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700">Cancel</button>
+        <button id="confirm-ok-btn" type="button" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="no-print fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-xs w-full pointer-events-none"></div>
+
+  <script>
+    /* =========================================================================
+       MATHS ANSWER KEY STUDIO — PWA + TAMIL/ENGLISH + A4 SAFE MATHJAX ENGINE
+       ========================================================================= */
+
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    /* PWA Service Worker Registration & Address Bar Install Prompt */
+    let deferredInstallPrompt = null;
+    if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+      window.addEventListener('load', () => {
+        try {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        } catch (e) {}
+      });
+    }
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btn = document.getElementById('btn-install-pwa');
+      if (btn) btn.classList.remove('hidden');
+    });
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      const btn = document.getElementById('btn-install-pwa');
+      if (btn) btn.classList.add('hidden');
+      showToast('Maths Answer Key Studio installed as App!', 'success');
+    });
+
+    /* Language Dictionaries (English & Tamil Official DGE Terminology) */
+    const LANG_I18N = {
+      en: {
+        keyTitle: 'ANSWER KEY',
+        subjectLbl: 'SUBJECT',
+        maxMarksLbl: 'MAXIMUM MARKS',
+        mediumLbl: 'MEDIUM',
+        defaultSchool: 'DIRECTORATE OF GOVERNMENT EXAMINATIONS / MODEL SCHOOL',
+        defaultExam100: 'SSLC PUBLIC EXAMS – MARCH/APRIL – 2026',
+        defaultExam50: 'HALF-YEARLY / MODEL EXAM – 2026 (50 MARKS)',
+        defaultSubject: 'MATHEMATICS',
+        defaultMedium: 'ENGLISH',
+        colsP1: ['Q.No', 'Option Code', 'Key Answer', 'Marks Allotted'],
+        colsP2: ['Q.NO', 'ANSWERS', 'Step Marks', 'Total Marks'],
+        parts100: {
+          'PART-I':   { title: 'PART – I',   subtitle: 'Answer all Questions', formula: '14×1=14', perQ: 1 },
+          'PART-II':  { title: 'PART – II',  subtitle: 'Answer any Ten Questions. Q.No : 28 is Compulsory', formula: '10×2=20', perQ: 2 },
+          'PART-III': { title: 'PART – III', subtitle: 'Answer any Ten Questions. Q.No : 42 is Compulsory', formula: '10×5=50', perQ: 5 },
+          'PART-IV':  { title: 'PART – IV',  subtitle: 'Answer all Questions', formula: '2×8=16', perQ: 8 }
+        },
+        parts50: {
+          'PART-I':   { title: 'PART – I',   subtitle: 'Answer all Questions', formula: '7×1=7', perQ: 1 },
+          'PART-II':  { title: 'PART – II',  subtitle: 'Answer any Five Questions. Q.No : 14 is Compulsory', formula: '5×2=10', perQ: 2 },
+          'PART-III': { title: 'PART – III', subtitle: 'Answer any Five Questions. Q.No : 21 is Compulsory', formula: '5×5=25', perQ: 5 },
+          'PART-IV':  { title: 'PART – IV',  subtitle: 'Answer all Questions', formula: '1×8=8', perQ: 8 }
+        },
+        optMap: { '(a)': '(a)', '(b)': '(b)', '(c)': '(c)', '(d)': '(d)' }
+      },
+      ta: {
+        keyTitle: 'விடைக்குறிப்பு (ANSWER KEY)',
+        subjectLbl: 'பாடம்',
+        maxMarksLbl: 'மொத்த மதிப்பெண்கள்',
+        mediumLbl: 'வழி',
+        defaultSchool: 'அரசுத் தேர்வுகள் இயக்ககம் / மாதிரி மேல்நிலைப் பள்ளி',
+        defaultExam100: 'பத்தாம் வகுப்பு பொதுத் தேர்வு – மார்ச் / ஏப்ரல் – 2026',
+        defaultExam50: 'அரையாண்டு / மாதிரித் தேர்வு – 2026 (50 மதிப்பெண்கள்)',
+        defaultSubject: 'கணிதம்',
+        defaultMedium: 'தமிழ் வழி',
+        colsP1: ['வினா எண்', 'குறியீடு', 'சரியான விடை', 'மதிப்பெண்'],
+        colsP2: ['வினா எண்', 'விடைகள்', 'படிநிலை மதிப்பெண்', 'மொத்த மதிப்பெண்'],
+        parts100: {
+          'PART-I':   { title: 'பகுதி – I',   subtitle: 'அனைத்து வினாக்களுக்கும் விடையளிக்கவும்', formula: '14×1=14', perQ: 1 },
+          'PART-II':  { title: 'பகுதி – II',  subtitle: 'எவையேனும் பத்து வினாக்களுக்கு விடையளிக்கவும். வினா எண் : 28 கட்டாயம்', formula: '10×2=20', perQ: 2 },
+          'PART-III': { title: 'பகுதி – III', subtitle: 'எவையேனும் பத்து வினாக்களுக்கு விடையளிக்கவும். வினா எண் : 42 கட்டாயம்', formula: '10×5=50', perQ: 5 },
+          'PART-IV':  { title: 'பகுதி – IV',  subtitle: 'அனைத்து வினாக்களுக்கும் விடையளிக்கவும்', formula: '2×8=16', perQ: 8 }
+        },
+        parts50: {
+          'PART-I':   { title: 'பகுதி – I',   subtitle: 'அனைத்து வினாக்களுக்கும் விடையளிக்கவும்', formula: '7×1=7', perQ: 1 },
+          'PART-II':  { title: 'பகுதி – II',  subtitle: 'எவையேனும் ஐந்து வினாக்களுக்கு விடையளிக்கவும். வினா எண் : 14 கட்டாயம்', formula: '5×2=10', perQ: 2 },
+          'PART-III': { title: 'பகுதி – III', subtitle: 'எவையேனும் ஐந்து வினாக்களுக்கு விடையளிக்கவும். வினா எண் : 21 கட்டாயம்', formula: '5×5=25', perQ: 5 },
+          'PART-IV':  { title: 'பகுதி – IV',  subtitle: 'அனைத்து வினாக்களுக்கும் விடையளிக்கவும்', formula: '1×8=8', perQ: 8 }
+        },
+        optMap: { '(a)': '(அ)', '(b)': '(ஆ)', '(c)': '(இ)', '(d)': '(ஈ)' }
+      }
+    };
+
+    const PROVIDER_META = {
+      offline: { needsKey: false, vision: false, hint: 'Works 100% offline with Tesseract OCR + Smart Math-Mode Normalizer ($2x^2$, fractions, roots).' },
+      gemini: { needsKey: true, vision: true, hint: 'Free Google AI Studio key: Sends uploaded photos/PDF pages directly to Gemini 2.5 Flash Vision to extract exact LaTeX & solve in English or Tamil.' },
+      'openrouter-deepseek': { needsKey: true, vision: false, hint: 'Free OpenRouter key: Uses open-source DeepSeek R1 (deepseek/deepseek-r1:free) to solve in English or Tamil.' },
+      'openrouter-gemma': { needsKey: true, vision: true, hint: 'Free OpenRouter key: Uses Google open-source Gemma 3 27B Vision (google/gemma-3-27b-it:free) to read uploaded photos.' },
+      'openrouter-qwen-vl': { needsKey: true, vision: true, hint: 'Free OpenRouter key: Uses open-source Qwen 2.5 VL 72B Vision for accurate math equation OCR from photos.' },
+      deepseek: { needsKey: true, vision: false, hint: 'Official DeepSeek API key: Uses DeepSeek solver on extracted bulk questions.' }
+    };
+
+    /* Official 2026 10th Maths Public Exam Answer Key (100 Marks — All 44 Qs) */
+    const PUBLIC_2026_100M = [
+      { part: 'PART-I', qNo: '1.', optionCode: '(a)', keyAnswer: '$(8, 6)$', keyAnswerTa: '$(8, 6)$', marks: 1, question: 'If $\\{(a,8),(6,b)\\}$ represents an identity function, then the value of $a$ and $b$ are respectively:' },
+      { part: 'PART-I', qNo: '2.', optionCode: '(d)', keyAnswer: 'quadratic', keyAnswerTa: 'இருபடிச் சார்பு', marks: 1, question: '$f(x) = (x+1)^3 - (x-1)^3$ represents a function which is:' },
+      { part: 'PART-I', qNo: '3.', optionCode: '(b)', keyAnswer: '$2$', keyAnswerTa: '$2$', marks: 1, question: 'If the H.C.F of $65$ and $117$ is expressible in the form of $65m - 117$, then the value of $m$ is:' },
+      { part: 'PART-I', qNo: '4.', optionCode: '(c)', keyAnswer: '$14280$', keyAnswerTa: '$14280$', marks: 1, question: 'The value of $(1^3+2^3+3^3+\\dots+15^3) - (1+2+3+\\dots+15)$ is:' },
+      { part: 'PART-I', qNo: '5.', optionCode: '(a)', keyAnswer: '$x=1, y=2, z=3$', keyAnswerTa: '$x=1, y=2, z=3$', marks: 1, question: 'The solution of the system $x+y-3z=-6,\\; -7y+7z=7,\\; 3z=9$ is:' },
+      { part: 'PART-I', qNo: '6.', optionCode: '(d)', keyAnswer: '$4 \\times 3$', keyAnswerTa: '$4 \\times 3$', marks: 1, question: 'For the given $3 \\times 4$ matrix $A$, the order of the matrix $A^T$ is:' },
+      { part: 'PART-I', qNo: '7.', optionCode: '(a)', keyAnswer: '$13\\text{ m}$', keyAnswerTa: '$13$ மீ', marks: 1, question: 'Two poles of heights $6\\text{ m}$ and $11\\text{ m}$ stand vertically. Distance between feet is $12\\text{ m}$. Distance between tops:' },
+      { part: 'PART-I', qNo: '8.', optionCode: '(c)', keyAnswer: '$(3, 5)$', keyAnswerTa: '$(3, 5)$', marks: 1, question: 'The point of intersection of $3x - y = 4$ and $x + y = 8$ is:' },
+      { part: 'PART-I', qNo: '9.', optionCode: '(b)', keyAnswer: 'Parallel to Y axis', keyAnswerTa: 'Y - அச்சுக்கு இணை', marks: 1, question: 'The straight line given by the equation $x = 11$ is:' },
+      { part: 'PART-I', qNo: '10.', optionCode: '(a)', keyAnswer: '$2$', keyAnswerTa: '$2$', marks: 1, question: 'If $\\tan\\theta + \\cot\\theta = 2$, then $\\tan^2\\theta + \\cot^2\\theta$ is:' },
+      { part: 'PART-I', qNo: '11.', optionCode: '(c)', keyAnswer: '$4x\\text{ cm}$', keyAnswerTa: '$4x$ செ.மீ', marks: 1, question: 'Solid sphere of radius $x\\text{ cm}$ melted into cone of same radius. Height of cone:' },
+      { part: 'PART-I', qNo: '12.', optionCode: '(a)', keyAnswer: '$2 : 1$', keyAnswerTa: '$2 : 1$', marks: 1, question: 'Sphere of radius $r_1$ melted into $8$ identical spheres of radius $r_2$. Then $r_1 : r_2$ is:' },
+      { part: 'PART-I', qNo: '13.', optionCode: '(b)', keyAnswer: '$2$', keyAnswerTa: '$2$', marks: 1, question: 'For $\\Sigma x^2 = 140,\\; \\Sigma x = 28,\\; n = 7$, standard deviation is:' },
+      { part: 'PART-I', qNo: '14.', optionCode: '(b)', keyAnswer: '$\\dfrac{p}{p + q + r}$', keyAnswerTa: '$\\dfrac{p}{p + q + r}$', marks: 1, question: 'Probability of red marble from $p$ red, $q$ blue, $r$ green marbles:' },
+      { part: 'PART-II', qNo: '15', marks: 2, question: '$R=\\{(x,y)/y=x+3, x\\in\\{0,1,2,3,4,5\\}\\}$. Find domain and range.', steps: [{ text: 'Domain $= \\{0, 1, 2, 3, 4, 5\\}$', textTa: 'சார்பகம் $= \\{0, 1, 2, 3, 4, 5\\}$', mark: 1 }, { text: 'Range $= \\{3, 4, 5, 6, 7, 8\\}$', textTa: 'வீச்சகம் $= \\{3, 4, 5, 6, 7, 8\\}$', mark: 1 }] },
+      { part: 'PART-II', qNo: '16', marks: 2, question: 'Determine whether $R=\\{(-5,a),(1,a),(3,b)\\}$ is a function.', steps: [{ text: '$4 \\in X$ does not have an image in $Y$', textTa: '$4 \\in X$ -க்கு $Y$ -இல் நிழல் உரு இல்லை', mark: 1 }, { text: '$\\therefore R$ is not a function.', textTa: '$\\therefore R$ ஒரு சார்பு அல்ல.', mark: 1 }] },
+      { part: 'PART-II', qNo: '17', marks: 2, question: 'Find least positive $x$ such that $71 \\equiv x \\pmod 8$.', steps: [{ text: '$71 - x = 8k$', mark: 1 }, { text: '$x = 7$', mark: 1 }] },
+      { part: 'PART-II', qNo: '18', marks: 2, question: 'Find sum to infinity of $9 + 3 + 1 + \\dots$', steps: [{ text: '$S_\\infty = \\dfrac{a}{1 - r} = \\dfrac{9}{1 - \\frac{1}{3}}$', mark: 1 }, { text: '$S_\\infty = \\dfrac{27}{2}$ (or) $13.5$', textTa: '$S_\\infty = \\dfrac{27}{2}$ (அல்லது) $13.5$', mark: 1 }] },
+      { part: 'PART-II', qNo: '19', marks: 2, question: 'Reduce $\\dfrac{x^2 - 16}{x^2 + 8x + 16}$ to lowest form.', steps: [{ text: '$\\dfrac{x^2 - 4^2}{(x+4)(x+4)} = \\dfrac{(x+4)(x-4)}{(x+4)(x+4)}$', mark: 1 }, { text: '$= \\dfrac{x - 4}{x + 4}$', mark: 1 }] },
+      { part: 'PART-II', qNo: '20', marks: 2, question: 'Difference between a number and its reciprocal is $\\dfrac{24}{5}$. Find the number.', steps: [{ text: '$x - \\dfrac{1}{x} = \\dfrac{24}{5}$', mark: 1 }, { text: '$x = 5,\\; -\\dfrac{1}{5}$', mark: 1 }] },
+      { part: 'PART-II', qNo: '21', marks: 2, question: 'Construct $3 \\times 3$ matrix with $a_{ij} = |i - 2j|$.', steps: [{ text: '$A = \\begin{pmatrix} a_{11} & a_{12} & a_{13} \\\\ a_{21} & a_{22} & a_{23} \\\\ a_{31} & a_{32} & a_{33} \\end{pmatrix}$', mark: 1 }, { text: '$A = \\begin{pmatrix} 1 & 3 & 5 \\\\ 0 & 2 & 4 \\\\ 1 & 1 & 3 \\end{pmatrix}$', mark: 1 }] },
+      { part: 'PART-II', qNo: '22', marks: 2, question: 'Show $DE \\parallel BC$ for $AB=5.6, AD=1.4, AC=7.2, AE=1.8$.', steps: [{ text: '$\\dfrac{AD}{DB} = \\dfrac{1}{3},\\; \\dfrac{AE}{EC} = \\dfrac{1}{3} \\Rightarrow \\dfrac{AD}{DB} = \\dfrac{AE}{EC}$', mark: 1 }, { text: 'By Thales Theorem $\\Rightarrow DE \\parallel BC$', textTa: 'தேல்ஸ் தேற்றத்தின் மறுதலைப்படி $\\Rightarrow DE \\parallel BC$', mark: 1 }] },
+      { part: 'PART-II', qNo: '23', marks: 2, question: 'Find slope of line joining $(14, 10)$ and $(14, -6)$.', steps: [{ text: '$m = \\dfrac{y_2 - y_1}{x_2 - x_1} = \\dfrac{-6 - 10}{14 - 14}$', mark: 1 }, { text: '$m = \\dfrac{-16}{0}$ (or) undefined', textTa: '$m = \\dfrac{-16}{0}$ (வரையறுக்கப்படவில்லை)', mark: 1 }] },
+      { part: 'PART-II', qNo: '24', marks: 2, question: 'Find equation of line with $x, y$ intercepts $4$ and $-6$.', steps: [{ text: '$\\dfrac{x}{a} + \\dfrac{y}{b} = 1 \\Rightarrow \\dfrac{x}{4} + \\dfrac{y}{-6} = 1$', mark: 1 }, { text: '$3x - 2y - 12 = 0$', mark: 1 }] },
+      { part: 'PART-II', qNo: '25', marks: 2, question: 'Prove $\\sqrt{\\dfrac{1+\\cos\\theta}{1-\\cos\\theta}} = \\operatorname{cosec}\\theta + \\cot\\theta$.', steps: [{ text: '$\\sqrt{\\dfrac{1 + \\cos\\theta}{1 - \\cos\\theta} \\times \\dfrac{1 + \\cos\\theta}{1 + \\cos\\theta}}$', mark: 1 }, { text: '$\\dfrac{1 + \\cos\\theta}{\\sin\\theta} = \\operatorname{cosec}\\theta + \\cot\\theta$', mark: 1 }] },
+      { part: 'PART-II', qNo: '26', marks: 2, question: 'Find Standard Deviation of first $21$ natural numbers.', steps: [{ text: '$\\sigma = \\sqrt{\\dfrac{n^2 - 1}{12}} = \\sqrt{\\dfrac{21^2 - 1}{12}}$', mark: 1 }, { text: '$\\sigma \\approx 6.05$ (or) $6.06$', textTa: '$\\sigma \\approx 6.05$ (அல்லது) $6.06$', mark: 1 }] },
+      { part: 'PART-II', qNo: '27', marks: 2, question: 'Die rolled and coin tossed. Find probability of odd number and head.', steps: [{ text: '$S = \\{1H, 1T, \\dots, 6H, 6T\\},\\; n(S) = 12$', mark: 1 }, { text: '$P(A) = \\dfrac{3}{12} = \\dfrac{1}{4}$', mark: 1 }] },
+      { part: 'PART-II', qNo: '28', marks: 2, question: 'Ratio of volume of cube to largest sphere fitting inside it.', steps: [{ text: '$V_1 : V_2 = a^3 : \\dfrac{4}{3}\\pi r^3$', mark: 1 }, { text: '$1 : \\dfrac{\\pi}{6}$ (or) $6 : \\pi$ (or) $21 : 11$', textTa: '$1 : \\dfrac{\\pi}{6}$ (அல்லது) $6 : \\pi$ (அல்லது) $21 : 11$', mark: 1 }] },
+      { part: 'PART-III', qNo: '29', marks: 5, question: 'Verify $A \\times (B \\cap C) = (A \\times B) \\cap (A \\times C)$.', steps: [{ text: '$A = \\{0, 1\\},\\; B = \\{2, 3, 4\\},\\; C = \\{3, 5\\}$', mark: 1 }, { text: '$B \\cap C = \\{3\\},\\; A \\times (B \\cap C) = \\{(0,3),(1,3)\\}$', mark: 1 }, { text: '$A \\times B = \\{(0,2),(0,3),(0,4),(1,2),(1,3),(1,4)\\}$', mark: 1 }, { text: '$A \\times C = \\{(0,3),(0,5),(1,3),(1,5)\\}$', mark: 1 }, { text: '$(A \\times B) \\cap (A \\times C) = \\{(0,3),(1,3)\\}$ — Verified', textTa: '$(A \\times B) \\cap (A \\times C) = \\{(0,3),(1,3)\\}$ — சரிபார்க்கப்பட்டது', mark: 1 }] },
+      { part: 'PART-III', qNo: '30', marks: 5, question: 'Prove $(f \\circ g) \\circ h = f \\circ (g \\circ h)$.', steps: [{ text: '$f \\circ g = 3x$', mark: 1 }, { text: '$(f \\circ g) \\circ h = 3x^2$', mark: 1 }, { text: '$g \\circ h = 3x^2 + 1$', mark: 1 }, { text: '$f \\circ (g \\circ h) = 3x^2$', mark: 1 }, { text: '$(f \\circ g) \\circ h = f \\circ (g \\circ h)$ — Proved', textTa: '$(f \\circ g) \\circ h = f \\circ (g \\circ h)$ — நிரூபிக்கப்பட்டது', mark: 1 }] },
+      { part: 'PART-III', qNo: '31', marks: 5, question: 'Sum of all natural numbers between $300$ and $600$ divisible by $7$.', steps: [{ text: '$301, 308, \\dots, 595 \\Rightarrow a=301,\\; d=7,\\; l=595$', mark: 1 }, { text: '$n = \\dfrac{595 - 301}{7} + 1$', mark: 1 }, { text: '$n = 43$', mark: 1 }, { text: '$S_n = \\dfrac{43}{2}(301 + 595)$', mark: 1 }, { text: '$S_{43} = 19264$', mark: 1 }] },
+      { part: 'PART-III', qNo: '32', marks: 5, question: 'Sum to $n$ terms of $3 + 33 + 333 + \\dots$', steps: [{ text: '$S_n = 3(1 + 11 + 111 + \\dots)$', mark: 1 }, { text: '$= \\dfrac{3}{9}(9 + 99 + 999 + \\dots)$', mark: 1 }, { text: '$= \\dfrac{3}{9}(10 + 100 + 1000 + \\dots - n)$', mark: 1 }, { text: '$S_n = \\dfrac{a(r^n - 1)}{r - 1}$', mark: 1 }, { text: '$S_n = \\left[\\dfrac{10(10^n - 1)}{27}\\right] - \\dfrac{n}{3}$', mark: 1 }] },
+      { part: 'PART-III', qNo: '33', marks: 5, question: 'Verify $(AB)^T = B^T A^T$.', steps: [{ text: '$AB = \\begin{pmatrix} 52 & 30 \\\\ 43 & 3 \\end{pmatrix}$', mark: 1 }, { text: '$(AB)^T = \\begin{pmatrix} 52 & 43 \\\\ 30 & 3 \\end{pmatrix}$', mark: 1 }, { text: '$A^T = \\begin{pmatrix} 5 & 1 \\\\ 2 & 2 \\\\ 9 & 8 \\end{pmatrix}$', mark: 1 }, { text: '$B^T = \\begin{pmatrix} 1 & 1 & 5 \\\\ 7 & 2 & -1 \\end{pmatrix}$', mark: 1 }, { text: '$B^T A^T = \\begin{pmatrix} 52 & 43 \\\\ 30 & 3 \\end{pmatrix} \\Rightarrow (AB)^T = B^T A^T$', mark: 1 }] },
+      { part: 'PART-III', qNo: '34', marks: 5, question: 'Show that angle bisectors of a triangle are concurrent.', steps: [{ text: '$AD$ bisects $\\angle A \\Rightarrow \\dfrac{AB}{AC} = \\dfrac{BD}{DC}$', textTa: '$AD$ என்பது $\\angle A$ -இன் கோண இருசமவெட்டி $\\Rightarrow \\dfrac{AB}{AC} = \\dfrac{BD}{DC}$', mark: 1 }, { text: '$BE$ bisects $\\angle B \\Rightarrow \\dfrac{BC}{BA} = \\dfrac{CE}{EA}$', textTa: '$BE$ என்பது $\\angle B$ -இன் கோண இருசமவெட்டி $\\Rightarrow \\dfrac{BC}{BA} = \\dfrac{CE}{EA}$', mark: 1 }, { text: '$CF$ bisects $\\angle C \\Rightarrow \\dfrac{CA}{CB} = \\dfrac{AF}{FB}$', textTa: '$CF$ என்பது $\\angle C$ -இன் கோண இருசமவெட்டி $\\Rightarrow \\dfrac{CA}{CB} = \\dfrac{AF}{FB}$', mark: 1 }, { text: '$1 = \\dfrac{BD}{DC} \\times \\dfrac{CE}{EA} \\times \\dfrac{AF}{FB}$', mark: 1 }, { text: 'By Ceva’s Theorem, angle bisectors are concurrent.', textTa: 'சீவா தேற்றப்படி கோண இருசமவெட்டிகள் ஒரு புள்ளி வழியாகச் செல்லும்.', mark: 1 }] },
+      { part: 'PART-III', qNo: '35', marks: 5, question: 'Area of quadrilateral with vertices $(8,6),(5,11),(-5,12),(-4,3)$.', steps: [{ text: 'Vertices in order: $(8,6),(5,11),(-5,12),(-4,3)$', textTa: 'முனைகள் வரிசைப்படி: $(8,6),(5,11),(-5,12),(-4,3)$', mark: 1 }, { text: 'Area $= \\dfrac{1}{2}\\begin{vmatrix} x_1 & x_2 & x_3 & x_4 & x_1 \\\\ y_1 & y_2 & y_3 & y_4 & y_1 \\end{vmatrix}$', textTa: 'நாற்கரத்தின் பரப்பு $= \\dfrac{1}{2}\\begin{vmatrix} x_1 & x_2 & x_3 & x_4 & x_1 \\\\ y_1 & y_2 & y_3 & y_4 & y_1 \\end{vmatrix}$', mark: 1 }, { text: '$= \\dfrac{1}{2}[(88+60-15-24)-(30-55-48+24)]$', mark: 2 }, { text: '$= \\dfrac{1}{2}[158] = 79\\text{ sq. units}$', textTa: '$= \\dfrac{1}{2}[158] = 79$ சதுர அலகுகள்', mark: 1 }] },
+      { part: 'PART-III', qNo: '36', marks: 5, question: 'Equation of altitude through $A(-3,0)$ for $B(10,-2), C(12,3)$.', steps: [{ text: 'Slope of $BC = \\dfrac{5}{2}$', textTa: '$BC$ -இன் சாய்வு $= \\dfrac{5}{2}$', mark: 1 }, { text: 'Slope of Altitude $AD = -\\dfrac{2}{5}$', textTa: 'குத்துக்கோடு $AD$ -இன் சாய்வு $= -\\dfrac{2}{5}$', mark: 1 }, { text: '$y - y_1 = m(x - x_1)$', mark: 1 }, { text: '$y - 0 = -\\dfrac{2}{5}(x + 3)$', mark: 1 }, { text: '$2x + 5y + 6 = 0$', mark: 1 }] },
+      { part: 'PART-III', qNo: '37', marks: 5, question: 'Distance between two ships ($200\\text{ m}$ lighthouse, $30^\\circ, 45^\\circ$).', steps: [{ text: 'Diagram with $h = 200\\text{ m},\\; 30^\\circ,\\; 45^\\circ$', textTa: 'படம்: உயரம் $h = 200$ மீ, கோணங்கள் $30^\\circ, 45^\\circ$', mark: 1 }, { text: '$\\tan 30^\\circ = \\dfrac{200}{x} \\Rightarrow x = 200\\sqrt{3}$', mark: 1 }, { text: '$\\tan 45^\\circ = \\dfrac{200}{y} \\Rightarrow y = 200$', mark: 1 }, { text: 'Distance $= x + y = 200\\sqrt{3} + 200$', textTa: 'தொலைவு $= x + y = 200\\sqrt{3} + 200$', mark: 1 }, { text: '$= 546.4\\text{ m}$', textTa: '$= 546.4$ மீ', mark: 1 }] },
+      { part: 'PART-III', qNo: '38', marks: 5, question: 'Garden roller length $3\\text{ m}$, diameter $2.8\\text{ m}$. Area in $8$ revolutions.', steps: [{ text: 'CSA $= 2\\pi r h$', textTa: 'உருளையின் வளைபரப்பு $= 2\\pi r h$', mark: 1 }, { text: '$= 2 \\times \\dfrac{22}{7} \\times 1.4 \\times 3 = 26.4\\text{ sq. m}$', textTa: '$= 2 \\times \\dfrac{22}{7} \\times 1.4 \\times 3 = 26.4$ ச.மீ', mark: 2 }, { text: 'Area in $8$ rev $= 8 \\times 26.4$', textTa: '8 சுற்றுகளில் பரப்பு $= 8 \\times 26.4$', mark: 1 }, { text: '$= 211.2\\text{ sq. m}$', textTa: '$= 211.2$ ச.மீ', mark: 1 }] },
+      { part: 'PART-III', qNo: '39', marks: 5, question: 'Cone ($d=14, h=8$) melted into hollow sphere ($D=10$). Find internal diameter.', steps: [{ text: '$V_{\\text{cone}} = \\dfrac{1}{3}\\pi r_1^2 h$, $V_{\\text{sphere}} = \\dfrac{4}{3}\\pi(R^3 - r^3)$', mark: 1 }, { text: '$\\dfrac{1}{3}\\pi r_1^2 h = \\dfrac{4}{3}\\pi(R^3 - r^3)$', mark: 1 }, { text: '$\\dfrac{1}{3} \\times 7 \\times 7 \\times 8 = \\dfrac{4}{3}(5^3 - r^3)$', mark: 1 }, { text: '$r^3 = 27 \\Rightarrow r = 3\\text{ cm}$', textTa: '$r^3 = 27 \\Rightarrow r = 3$ செ.மீ', mark: 1 }, { text: 'Internal diameter $= 6\\text{ cm}$', textTa: 'உள்விட்டம் $= 6$ செ.மீ', mark: 1 }] },
+      { part: 'PART-III', qNo: '40', marks: 5, question: 'Coefficient of variation of $24, 26, 33, 37, 29, 31$.', steps: [{ text: '$\\bar{x} = \\dfrac{180}{6} = 30$', mark: 1 }, { text: 'Deviation Table', textTa: 'விலக்க அட்டவணை', mark: 1 }, { text: '$\\sigma = \\sqrt{\\dfrac{\\Sigma d^2}{n}} \\approx 4.32$', mark: 1 }, { text: '$\\text{C.V} = \\dfrac{\\sigma}{\\bar{x}} \\times 100\\%$', mark: 1 }, { text: '$\\text{C.V} \\approx 14.4\\%$', mark: 1 }] },
+      { part: 'PART-III', qNo: '41', marks: 5, question: 'Two dice rolled. Probability of doublet or sum $4$.', steps: [{ text: '$n(S) = 36$', mark: 1 }, { text: '$P(A) = \\dfrac{6}{36} = \\dfrac{1}{6}$', mark: 1 }, { text: '$P(B) = \\dfrac{3}{36} = \\dfrac{1}{12}$', mark: 1 }, { text: '$P(A \\cap B) = \\dfrac{1}{36},\\; P(A \\cup B) = P(A)+P(B)-P(A \\cap B)$', mark: 1 }, { text: '$P(A \\cup B) = \\dfrac{8}{36} = \\dfrac{2}{9}$', mark: 1 }] },
+      { part: 'PART-III', qNo: '42', marks: 5, question: 'Roots of $2x^2 - 3x + 1 = 0$ are $\\alpha, \\beta$. Form equation with roots $\\dfrac{1}{\\alpha^2}, \\dfrac{1}{\\beta^2}$.', steps: [{ text: '$\\alpha + \\beta = \\dfrac{3}{2},\\quad \\alpha\\beta = \\dfrac{1}{2}$', mark: 1 }, { text: '$\\dfrac{1}{\\alpha^2} + \\dfrac{1}{\\beta^2} = 5$', mark: 1 }, { text: '$\\dfrac{1}{\\alpha^2} \\times \\dfrac{1}{\\beta^2} = 4$', mark: 1 }, { text: '$x^2 - (\\text{Sum})x + (\\text{Product}) = 0$', textTa: '$x^2 -$ (மூலங்களின் கூடுதல்)$x +$ (மூலங்களின் பெருக்கல்) $= 0$', mark: 1 }, { text: '$x^2 - 5x + 4 = 0$', mark: 1 }] },
+      { part: 'PART-IV', qNo: '43 (a)', marks: 8, question: 'Construct triangle similar to $\\triangle PQR$ with scale factor $\\dfrac{3}{5}$.', steps: [{ text: 'Rough Diagram', textTa: 'உதவிப் படம்', mark: 1 }, { text: 'Draw $\\triangle PQR$', textTa: '$\\triangle PQR$ வரைதல்', mark: 2 }, { text: 'Draw ray $QX$', textTa: '$QX$ கதிர் வரைதல்', mark: 1 }, { text: 'Mark $Q_1 \\dots Q_5$ & Join $Q_5R$', textTa: '$Q_1 \\dots Q_5$ குறித்து $Q_5R$ இணைத்தல்', mark: 2 }, { text: 'Draw $Q_3R\' \\parallel Q_5R$ & $R\'P\' \\parallel RP$ — (OR)', textTa: '$Q_3R\' \\parallel Q_5R$ மற்றும் $R\'P\' \\parallel RP$ வரைதல் — (அல்லது)', mark: 2 }] },
+      { part: 'PART-IV', qNo: '43 (b)', marks: 8, question: 'Circle of diameter $6\\text{ cm}$, tangents from point $P$ at $8\\text{ cm}$.', steps: [{ text: 'Rough Diagram', textTa: 'உதவிப் படம்', mark: 1 }, { text: 'Drawing first circle', textTa: 'முதல் வட்டம் வரைதல்', mark: 2 }, { text: 'Drawing second circle', textTa: 'இரண்டாம் வட்டம் வரைதல்', mark: 3 }, { text: 'Drawing two tangents', textTa: 'இரு தொடுகோடுகள் வரைதல்', mark: 1 }, { text: 'Length of tangent $= 7.3\\text{ cm}$ (or) $7.4\\text{ cm}$', textTa: 'தொடுகோட்டின் நீளம் $= 7.3$ செ.மீ (அல்லது) $7.4$ செ.மீ', mark: 1 }] },
+      { part: 'PART-IV', qNo: '44 (a)', marks: 8, question: 'Graph $x^2 - 6x + 9 = 0$ and state nature of roots.', xyTable: { x: [-2, -1, 0, 1, 2, 3, 4, 5], y: [25, 16, 9, 4, 1, 0, 1, 4], note: '(Any 5 points)', noteTa: '(ஏதேனும் 5 புள்ளிகள்)' }, steps: [{ text: '$X$-axis, $Y$-axis', textTa: '$X$-அச்சு, $Y$-அச்சு', mark: 1 }, { text: 'Scale', textTa: 'அளவுத் திட்டம்', mark: 1 }, { text: 'Value table (Any 5 points)', textTa: 'புள்ளிகள் அட்டவணை (ஏதேனும் 5 புள்ளிகள்)', mark: 3 }, { text: 'Draw the Parabola', textTa: 'பரவளையம் வரைதல்', mark: 2 }, { text: 'The Roots are Real and equal — (OR)', textTa: 'தீர்வுகள் மெய் மற்றும் சமம் — (அல்லது)', mark: 1 }] },
+      { part: 'PART-IV', qNo: '44 (b)', marks: 8, question: 'Graph $y = \\dfrac{1}{2}x$. Find $y$ when $x=9$, $x$ when $y=7.5$.', xyTable: { x: [2, 4, 6, 8, 10], y: [1, 2, 3, 4, 5], note: '(Any 5 points)', noteTa: '(ஏதேனும் 5 புள்ளிகள்)' }, steps: [{ text: '$X$-axis, $Y$-axis', textTa: '$X$-அச்சு, $Y$-அச்சு', mark: 1 }, { text: 'Scale', textTa: 'அளவுத் திட்டம்', mark: 1 }, { text: 'Value table (Any 5 points)', textTa: 'அட்டவணை (ஏதேனும் 5 புள்ளிகள்)', mark: 2 }, { text: 'Plot points & Draw Straight line', textTa: 'புள்ளிகளைக் குறித்து நேர்க்கோடு வரைதல்', mark: 2 }, { text: '(i) When $x = 9$, then $y = 4.5$', textTa: '(i) $x = 9$ எனில் $y = 4.5$', mark: 1 }, { text: '(ii) When $y = 7.5$, then $x = 15$', textTa: '(ii) $y = 7.5$ எனில் $x = 15$', mark: 1 }] }
+    ];
+
+    function build50MarkPreset() {
+      const p1 = PUBLIC_2026_100M.filter(q => q.part === 'PART-I').slice(0, 7).map((q, i) => ({ ...q, qNo: `${i + 1}.` }));
+      const p2 = PUBLIC_2026_100M.filter(q => q.part === 'PART-II').slice(0, 7).map((q, i) => ({ ...q, qNo: `${i + 8}` }));
+      const p3 = PUBLIC_2026_100M.filter(q => q.part === 'PART-III').slice(0, 7).map((q, i) => ({ ...q, qNo: `${i + 15}` }));
+      const p4 = PUBLIC_2026_100M.filter(q => q.part === 'PART-IV').slice(0, 2).map((q, i) => ({ ...q, qNo: i === 0 ? '22 (a)' : '22 (b)' }));
+      return [...p1, ...p2, ...p3, ...p4];
+    }
+
+    const state = {
+      lang: 'en', // 'en' or 'ta'
+      pattern: 100,
+      provider: 'offline',
+      apiKeys: {},
+      meta: {
+        school: LANG_I18N.en.defaultSchool,
+        exam: LANG_I18N.en.defaultExam100,
+        subject: LANG_I18N.en.defaultSubject,
+        medium: LANG_I18N.en.defaultMedium
+      },
+      options: { showQText: false, showStepMarks: true },
+      questions: [],
+      pageQueue: [],
+      partFilter: 'ALL',
+      searchQuery: '',
+      editingId: null
+    };
+
+    /* =========================================================================
+       MATHJAX TYPESETTING & SMART MATH-MODE NORMALIZER
+       ========================================================================= */
+
+    let mathJaxChain = Promise.resolve();
+    function typesetMathElements(elements) {
+      const list = (Array.isArray(elements) ? elements : [elements]).filter(Boolean);
+      if (list.length === 0) return Promise.resolve();
+      if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+        mathJaxChain = mathJaxChain
+          .then(() => {
+            if (typeof window.MathJax.typesetClear === 'function') window.MathJax.typesetClear(list);
+            return window.MathJax.typesetPromise(list);
+          })
+          .catch(() => {});
+        return mathJaxChain;
+      }
+      return Promise.resolve();
+    }
+
+    function normalizeMathMode(raw) {
+      if (!raw) return '';
+      return String(raw).split(/(\$[^$]+\$)/g).map(seg => {
+        if (seg.startsWith('$') && seg.endsWith('$') && seg.length > 2) return seg;
+        let s = seg;
+        s = s.replace(/²/g, '^2').replace(/³/g, '^3').replace(/⁴/g, '^4').replace(/⁻¹/g, '^{-1}');
+        s = s.replace(/\b(\d*)([xyzab])([234])\b/g, '$1$2^$3');
+        s = s.replace(/\(([a-z0-9+\-\s]+)\)([23])\b/gi, '($1)^$2');
+        s = s.replace(/\b(sin|cos|tan|sec|cosec|cot)([23])\s*(θ|theta|x|A)/gi, '$1^$2 $3');
+        s = s.replace(/<=/g, '\\le ').replace(/>=/g, '\\ge ').replace(/!=/g, '\\neq ');
+        s = s.replace(/±/g, '\\pm ').replace(/θ/g, '\\theta ').replace(/π/g, '\\pi ');
+        s = s.replace(/(?<!\$)([+-]?\d*[a-zA-Z]\^\d+(?:\s*[+-]\s*\d*[a-zA-Z]?(?:\^\d+)?)*(?:\s*=\s*[+-]?\d+)?)(?!\$)/g, '$$$1$$');
+        s = s.replace(/(?<!\$)\b(\d+)\s*\/\s*(\d+)\b(?!\$)/g, '$\\dfrac{$1}{$2}$');
+        s = s.replace(/sqrt\(\s*([^)]+)\s*\)/gi, '$\\sqrt{$1}$');
+        s = s.replace(/√(\d+|[a-zA-Z])/g, '$\\sqrt{$1}$');
+        s = s.replace(/(?<!\$)\b(\d+(?:\.\d+)?)°/g, '$$$1^\\circ$$');
+        return s;
+      }).join('');
+    }
+
+    function uid() { return 'q_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
+    function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+    function formatForMathJax(rawText) { return rawText ? escapeHtml(normalizeMathMode(rawText)) : ''; }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const colors = { success: 'bg-emerald-600 text-white border-emerald-700', error: 'bg-rose-600 text-white border-rose-700', warning: 'bg-amber-600 text-white border-amber-700', info: 'bg-slate-800 text-white border-slate-900' };
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto px-3.5 py-2.5 rounded-lg shadow-lg border text-xs font-medium transition-all duration-200 ${colors[type] || colors.info}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 220); }, 3200);
+    }
+
+    let confirmCallback = null;
+    function openConfirm(title, message, onConfirm) {
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-msg').textContent = message;
+      confirmCallback = onConfirm;
+      document.getElementById('confirm-modal').classList.remove('hidden');
+    }
+
+    function setProgress(show, text = '', pct = 0) {
+      const wrap = document.getElementById('extract-progress-wrap');
+      if (!show) { wrap.classList.add('hidden'); return; }
+      wrap.classList.remove('hidden');
+      document.getElementById('extract-status-text').textContent = text;
+      document.getElementById('extract-pct-text').textContent = `${Math.round(pct)}%`;
+      document.getElementById('extract-progress-bar').style.width = `${Math.min(100, Math.max(0, pct))}%`;
+    }
+
+    function gcd(a, b) { a = Math.abs(Math.round(a)); b = Math.abs(Math.round(b)); while (b) { [a, b] = [b, a % b]; } return a || 1; }
+    function toFractionLatex(num, den) {
+      if (den === 0) return '\\text{Undefined}';
+      if (den < 0) { num = -num; den = -den; }
+      const g = gcd(num, den); num /= g; den /= g;
+      if (den === 1) return String(num);
+      return num < 0 ? `-\\dfrac{${Math.abs(num)}}{${den}}` : `\\dfrac{${num}}{${den}}`;
+    }
+
+    /* =========================================================================
+       BULK MULTI-PHOTO & PDF QUEUE MANAGER
+       ========================================================================= */
+
+    async function addFilesToQueue(fileList) {
+      const files = Array.from(fileList || []);
+      for (const file of files) {
+        const name = file.name.toLowerCase();
+        if (name.endsWith('.json')) {
+          try {
+            const data = JSON.parse(await file.text());
+            if (data.meta && Array.isArray(data.questions)) {
+              state.lang = data.lang || 'en';
+              state.pattern = data.pattern || 100;
+              state.meta = { ...state.meta, ...data.meta };
+              state.questions = data.questions;
+              syncInputs(); persistState(); renderAll();
+              showToast(`Loaded "${file.name}".`, 'success');
+            }
+          } catch (e) { showToast('Invalid JSON.', 'error'); }
+          continue;
+        }
+        if (name.endsWith('.txt') || name.endsWith('.md')) {
+          const txt = normalizeMathMode(await file.text());
+          const box = document.getElementById('raw-paper-input');
+          box.value = (box.value ? box.value + '\n\n' : '') + txt;
+          updateMathPreview();
+          continue;
+        }
+        if (name.endsWith('.pdf')) { await renderPdfPagesToQueue(file); continue; }
+        if (file.type.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(name)) {
+          const dataUrl = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
+          state.pageQueue.push({ id: uid(), name: file.name, dataUrl, mimeType: file.type || 'image/jpeg' });
+        }
+      }
+      renderPageQueue();
+    }
+
+    async function renderPdfPagesToQueue(file) {
+      if (typeof pdfjsLib === 'undefined') { showToast('PDF reader not loaded.', 'error'); return; }
+      setProgress(true, `Rendering PDF pages...`, 10);
+      try {
+        const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+        const maxPages = Math.min(pdf.numPages, 12);
+        for (let p = 1; p <= maxPages; p++) {
+          setProgress(true, `Rendering page ${p}/${maxPages}...`, 10 + (p / maxPages) * 85);
+          const page = await pdf.getPage(p);
+          const viewport = page.getViewport({ scale: 1.6 });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width; canvas.height = viewport.height;
+          await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+          state.pageQueue.push({ id: uid(), name: `${file.name} (P.${p})`, dataUrl: canvas.toDataURL('image/jpeg', 0.85), mimeType: 'image/jpeg' });
+        }
+        setProgress(false);
+        showToast(`Added ${maxPages} PDF pages to queue.`, 'success');
+      } catch (e) { setProgress(false); showToast(`PDF error: ${e.message}`, 'error'); }
+    }
+
+    function renderPageQueue() {
+      const wrap = document.getElementById('page-queue-wrap');
+      const list = document.getElementById('page-queue-list');
+      const clearBtn = document.getElementById('btn-clear-queue');
+      document.getElementById('queue-count').textContent = state.pageQueue.length;
+      if (state.pageQueue.length === 0) { wrap.classList.add('hidden'); clearBtn.classList.add('hidden'); return; }
+      wrap.classList.remove('hidden'); clearBtn.classList.remove('hidden');
+      list.innerHTML = state.pageQueue.map((pg, idx) => `
+        <div class="relative shrink-0 w-20 bg-slate-100 rounded-lg border border-slate-300 overflow-hidden">
+          <img src="${pg.dataUrl}" alt="Page ${idx + 1}" class="w-20 h-24 object-cover" />
+          <div class="px-1 py-0.5 bg-slate-900/85 text-white text-[10px] font-bold text-center truncate">Page ${idx + 1}</div>
+          <button type="button" data-rm-page="${pg.id}" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] font-bold shadow">×</button>
+        </div>
+      `).join('');
+    }
+
+    /* =========================================================================
+       AI VISION & OPEN-SOURCE SOLVER (RESPECTS ENGLISH / TAMIL LANGUAGE TOGGLE)
+       ========================================================================= */
+
+    function getActiveKey() { return (state.apiKeys[state.provider] || '').trim(); }
+
+    function buildAiPrompt() {
+      const langInstr = state.lang === 'ta'
+        ? 'Generate all explanations, headings, and text answers in TAMIL (தமிழ்) using Option Codes (அ), (ஆ), (இ), (ஈ), while keeping all math equations in $...$ LaTeX.'
+        : 'Generate all explanations and text answers in ENGLISH using Option Codes (a), (b), (c), (d), keeping all math equations in $...$ LaTeX.';
+      return `You are an expert Mathematics Examiner. ${langInstr}
+CRITICAL RULES:
+1. Wrap EVERY math equation in $...$ LaTeX (e.g., $2x^2 - 7x + 3 = 0$, $\\dfrac{a}{b}$, $\\sqrt{x}$). NEVER write 2x2 instead of $2x^2$.
+2. Skip General Instructions and watermarks. Detect 100 Marks vs 50 Marks.
+3. Return ONLY valid JSON:
+{"pattern": 100, "questions": [{"part":"PART-I","qNo":"1.","optionCode":"(a)","keyAnswer":"$(8,6)$","marks":1,"question":"..."}, {"part":"PART-II","qNo":"15","marks":2,"question":"...","steps":[{"text":"$...$","mark":1}]}]}`;
+    }
+
+    async function callAiVisionOrTextSolver(pages, rawText) {
+      const provider = state.provider;
+      const apiKey = getActiveKey();
+      if (!apiKey) throw new Error('Enter and save your API key.');
+      const sysPrompt = buildAiPrompt();
+
+      if (provider === 'gemini') {
+        const parts = [{ text: sysPrompt + (rawText ? `\n\nText:\n${rawText}` : '\n\nExtract & solve all questions from these pages:') }];
+        pages.forEach(pg => parts.push({ inline_data: { mime_type: pg.mimeType || 'image/jpeg', data: pg.dataUrl.split(',')[1] } }));
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.1 } })
+        });
+        if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
+        const data = await res.json();
+        return parseAiJson(data.candidates?.[0]?.content?.parts?.[0]?.text || '');
+      }
+
+      if (provider.startsWith('openrouter-')) {
+        const modelMap = { 'openrouter-deepseek': 'deepseek/deepseek-r1:free', 'openrouter-gemma': 'google/gemma-3-27b-it:free', 'openrouter-qwen-vl': 'qwen/qwen2.5-vl-72b-instruct:free' };
+        const isVision = PROVIDER_META[provider].vision;
+        const userContent = isVision && pages.length > 0
+          ? [{ type: 'text', text: sysPrompt + (rawText ? `\n\n${rawText}` : '') }, ...pages.map(pg => ({ type: 'image_url', image_url: { url: pg.dataUrl } }))]
+          : sysPrompt + `\n\n${rawText}`;
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'HTTP-Referer': window.location.href, 'X-Title': 'Maths Answer Key Studio' },
+          body: JSON.stringify({ model: modelMap[provider], messages: [{ role: 'user', content: userContent }], temperature: 0.1 })
+        });
+        if (!res.ok) throw new Error(`OpenRouter HTTP ${res.status}`);
+        const data = await res.json();
+        return parseAiJson(data.choices?.[0]?.message?.content || '');
+      }
+
+      if (provider === 'deepseek') {
+        const res = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: rawText }], response_format: { type: 'json_object' }, temperature: 0.1 })
+        });
+        if (!res.ok) throw new Error(`DeepSeek HTTP ${res.status}`);
+        const data = await res.json();
+        return parseAiJson(data.choices?.[0]?.message?.content || '');
+      }
+      throw new Error('Unknown AI provider');
+    }
+
+    function parseAiJson(txt) {
+      const cleaned = txt.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      const s = cleaned.indexOf('{'), e = cleaned.lastIndexOf('}');
+      if (s === -1 || e === -1) throw new Error('Invalid AI JSON');
+      return JSON.parse(cleaned.slice(s, e + 1));
+    }
+
+    async function processPageQueue() {
+      if (state.pageQueue.length === 0) { showToast('Add at least 1 photo or PDF page.', 'warning'); return; }
+      const meta = PROVIDER_META[state.provider];
+      const hasKey = Boolean(getActiveKey());
+
+      if (meta.vision && hasKey) {
+        try {
+          setProgress(true, `Sending ${state.pageQueue.length} page(s) to Vision AI...`, 35);
+          const aiRes = await callAiVisionOrTextSolver(state.pageQueue, '');
+          if (aiRes?.questions?.length) {
+            state.pattern = aiRes.pattern === 50 ? 50 : 100;
+            state.questions = aiRes.questions.map(q => ({ ...q, id: uid() }));
+            setProgress(false); persistState(); renderAll();
+            showToast(`Vision AI solved ${state.questions.length} questions!`, 'success');
+            return;
+          }
+        } catch (err) {
+          setProgress(false);
+          showToast(`Vision AI failed (${err.message}). Using offline OCR.`, 'warning');
+        }
+      }
+
+      if (typeof Tesseract === 'undefined') { showToast('OCR library not loaded.', 'error'); return; }
+      let combined = '';
+      for (let i = 0; i < state.pageQueue.length; i++) {
+        setProgress(true, `Scanning Page ${i + 1}/${state.pageQueue.length}...`, (i / state.pageQueue.length) * 85);
+        try {
+          const res = await Tesseract.recognize(state.pageQueue[i].dataUrl, 'eng');
+          combined += `\n--- Page ${i + 1} ---\n` + normalizeMathMode((res.data?.text || '').trim()) + '\n';
+        } catch (e) {}
+      }
+      document.getElementById('raw-paper-input').value = combined.trim();
+      updateMathPreview();
+
+      if (!meta.vision && state.provider !== 'offline' && hasKey) {
+        try {
+          setProgress(true, 'Solving with DeepSeek...', 90);
+          const aiRes = await callAiVisionOrTextSolver([], combined.trim());
+          if (aiRes?.questions?.length) {
+            state.pattern = aiRes.pattern === 50 ? 50 : 100;
+            state.questions = aiRes.questions.map(q => ({ ...q, id: uid() }));
+            setProgress(false); persistState(); renderAll();
+            showToast(`DeepSeek solved ${state.questions.length} questions!`, 'success');
+            return;
+          }
+        } catch (err) { showToast(`DeepSeek error (${err.message}). Using offline solver.`, 'warning'); }
+      }
+      setProgress(true, 'Solving offline...', 95);
+      await processRawPaper(combined.trim(), false);
+      setProgress(false);
+    }
+
+    /* =========================================================================
+       OFFLINE PART-WISE PARSER & SOLVER
+       ========================================================================= */
+
+    function distributeMarks(lines, totalMarks) {
+      const n = lines.length; if (!n) return [];
+      const base = Math.floor(totalMarks / n); let rem = totalMarks - base * n;
+      return lines.map(txt => { let m = base + (rem > 0 ? 1 : 0); if (rem > 0) rem--; return { text: txt, mark: m || 0.5 }; });
+    }
+
+    function autoSolveForPart(questionText, part) {
+      const q = normalizeMathMode(questionText.trim());
+      const qPlain = q.replace(/\$/g, '');
+      const ql = qPlain.toLowerCase();
+      const totalMarks = part === 'PART-I' ? 1 : part === 'PART-II' ? 2 : part === 'PART-III' ? 5 : 8;
+
+      for (const preset of PUBLIC_2026_100M) {
+        const pClean = preset.question.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const qClean = ql.replace(/[^a-z0-9]/g, '');
+        if (qClean.length > 18 && (pClean.includes(qClean.slice(0, 22)) || qClean.includes(pClean.slice(0, 22)))) {
+          if (part === 'PART-I' && preset.part === 'PART-I') return { optionCode: preset.optionCode, keyAnswer: preset.keyAnswer, keyAnswerTa: preset.keyAnswerTa, marks: 1 };
+          if (part !== 'PART-I' && preset.steps) return { steps: preset.steps.map(s => ({ ...s })), xyTable: preset.xyTable || null, marks: preset.marks };
+        }
+      }
+
+      const quadM = qPlain.match(/([+-]?\s*\d*\.?\d*\s*x\^2(?:\s*[+-]\s*\d*\.?\d*\s*x)?(?:\s*[+-]\s*\d+\.?\d*)?)\s*=\s*([+-]?\s*\d*\.?\d*)/i);
+      if (quadM) {
+        const lhs = quadM[1].replace(/\s+/g, ''), rhs = parseFloat(quadM[2].replace(/\s+/g, '')) || 0;
+        const am = lhs.match(/([+-]?\d*\.?\d*)x\^2/i), r1s = lhs.replace(/([+-]?\d*\.?\d*)x\^2/i, '');
+        const bm = r1s.match(/([+-]?\d*\.?\d*)x/i), r2s = r1s.replace(/([+-]?\d*\.?\d*)x/i, '');
+        const pc = m => (!m ? 0 : (m[1] === '' || m[1] === '+' ? 1 : (m[1] === '-' ? -1 : parseFloat(m[1]))));
+        const a = pc(am), b = pc(bm), c = (parseFloat(r2s) || 0) - rhs;
+        if (a !== 0) {
+          const D = b * b - 4 * a * c, sD = D >= 0 ? Math.sqrt(D) : Math.sqrt(-D);
+          const rootStr = D >= 0
+            ? (Math.abs(sD - Math.round(sD)) < 1e-9 ? `$x = ${toFractionLatex(-b + Math.round(sD), 2 * a)},\\; ${toFractionLatex(-b - Math.round(sD), 2 * a)}$` : `$x = \\dfrac{${-b} \\pm \\sqrt{${D}}}{${2 * a}}$`)
+            : `$x = \\dfrac{${-b} \\pm \\sqrt{${-D}}i}{${2 * a}}$`;
+          if (part === 'PART-I') return { optionCode: '(a)', keyAnswer: rootStr, marks: 1 };
+          return { marks: totalMarks, steps: distributeMarks([`$a = ${a},\\; b = ${b},\\; c = ${c}$`, `$D = b^2 - 4ac = ${D}$`, `${state.lang === 'ta' ? 'மூலங்கள்' : 'Roots'}: ${rootStr}`], totalMarks) };
+        }
+      }
+
+      if (part === 'PART-I') return { optionCode: '(a)', keyAnswer: state.lang === 'ta' ? 'திருத்தவும்' : 'Click Edit', marks: 1 };
+      if (part === 'PART-IV') return { marks: 8, steps: [{ text: state.lang === 'ta' ? 'உதவிப் படம் / அச்சுகள்' : 'Rough Diagram / Axes', mark: 2 }, { text: state.lang === 'ta' ? 'வரைமுறை / அட்டவணை' : 'Construction / Value Table', mark: 3 }, { text: state.lang === 'ta' ? 'படம் / வரைபடம்' : 'Drawing / Curve', mark: 2 }, { text: state.lang === 'ta' ? 'இறுதி விடை' : 'Final Answer', mark: 1 }] };
+      if (part === 'PART-III') return { marks: 5, steps: [{ text: state.lang === 'ta' ? 'கொடுக்கப்பட்டவை & சூத்திரம்' : 'Given Data & Formula', mark: 1 }, { text: state.lang === 'ta' ? 'பிரதியிடல்' : 'Substitution', mark: 1 }, { text: state.lang === 'ta' ? 'சுருக்குதல்' : 'Simplification', mark: 2 }, { text: state.lang === 'ta' ? 'இறுதி விடை' : 'Final Answer', mark: 1 }] };
+      return { marks: 2, steps: [{ text: state.lang === 'ta' ? 'சூத்திரம் / பிரதியிடல்' : 'Formula / Substitution', mark: 1 }, { text: state.lang === 'ta' ? 'இறுதி விடை' : 'Final Answer', mark: 1 }] };
+    }
+
+    function parsePartWisePaper(rawText) {
+      const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(l => l && !/^---\s*Page\s*\d+|kalviexpress|turn over|register number|instructions\s*:|general instructions/i.test(l));
+      const is50 = /maximum\s*marks\s*[:\-]?\s*50\b|\b50\s*marks\b/i.test(rawText);
+      const is100 = /maximum\s*marks\s*[:\-]?\s*100\b|\b100\s*marks\b/i.test(rawText);
+      let currentPart = 'PART-I';
+      const parsed = [];
+      for (const line of lines) {
+        if (/part\s*[-–—]?\s*i\b(?!\s*[iv])|பகுதி\s*[-–—]?\s*i\b/i.test(line) && !/ii|iii|iv/i.test(line)) { currentPart = 'PART-I'; continue; }
+        if (/part\s*[-–—]?\s*ii\b(?!i)|பகுதி\s*[-–—]?\s*ii\b/i.test(line)) { currentPart = 'PART-II'; continue; }
+        if (/part\s*[-–—]?\s*iii\b|பகுதி\s*[-–—]?\s*iii\b/i.test(line)) { currentPart = 'PART-III'; continue; }
+        if (/part\s*[-–—]?\s*iv\b|பகுதி\s*[-–—]?\s*iv\b/i.test(line)) { currentPart = 'PART-IV'; continue; }
+        if (/^(?:note\s*:|answer\s+(?:all|any)\s+)/i.test(line)) continue;
+        const qMatch = line.match(/^(?:Q\.?\s*(\d+(?:\s*\([ab]\))?)|(\d+(?:\s*\([ab]\))?)\s*[.)])\s*(.+)$/i);
+        if (qMatch) {
+          const qNum = (qMatch[1] || qMatch[2]).trim();
+          parsed.push({ part: currentPart, qNo: currentPart === 'PART-I' ? `${qNum}.` : qNum, question: normalizeMathMode(qMatch[3].trim()) });
+        } else if (parsed.length > 0) parsed[parsed.length - 1].question += ' ' + normalizeMathMode(line);
+      }
+      let detectedPattern = state.pattern;
+      if (is50) detectedPattern = 50; else if (is100) detectedPattern = 100;
+      else if (parsed.length > 0 && parsed.length <= 24) detectedPattern = 50;
+      else if (parsed.length > 24) detectedPattern = 100;
+      return { detectedPattern, parsed };
+    }
+
+    async function processRawPaper(rawText, append = false) {
+      if (!rawText.trim()) { showToast('Upload photos/PDF or paste questions first.', 'warning'); return; }
+      if (state.provider !== 'offline' && getActiveKey() && !append) {
+        try {
+          setProgress(true, 'Solving bulk questions with AI...', 45);
+          const aiRes = await callAiVisionOrTextSolver([], normalizeMathMode(rawText));
+          if (aiRes?.questions?.length) {
+            state.pattern = aiRes.pattern === 50 ? 50 : 100;
+            state.questions = aiRes.questions.map(q => ({ ...q, id: uid() }));
+            setProgress(false); persistState(); renderAll();
+            showToast(`AI solved ${state.questions.length} questions!`, 'success');
+            return;
+          }
+        } catch (err) { setProgress(false); showToast(`AI error (${err.message}). Using offline solver.`, 'warning'); }
+      }
+      const { detectedPattern, parsed } = parsePartWisePaper(rawText);
+      if (!parsed.length) { showToast('No numbered questions detected.', 'warning'); return; }
+      if (!append) state.pattern = detectedPattern;
+      const items = parsed.map(p => ({ id: uid(), part: p.part, qNo: p.qNo, question: p.question, ...autoSolveForPart(p.question, p.part) }));
+      state.questions = append ? [...state.questions, ...items] : items;
+      persistState(); renderAll();
+      showToast(`Built ${state.pattern}-Mark Key (${items.length} Qs).`, 'success');
+    }
+
+    function updateMathPreview() {
+      const txt = document.getElementById('raw-paper-input').value.trim();
+      const box = document.getElementById('math-preview-box');
+      const content = document.getElementById('math-preview-content');
+      if (!txt) { box.classList.add('hidden'); return; }
+      box.classList.remove('hidden');
+      content.innerHTML = txt.split(/\r?\n/).filter(Boolean).slice(0, 6).map(l => `<div>${formatForMathJax(l)}</div>`).join('');
+      typesetMathElements(content);
+    }
+
+    /* =========================================================================
+       LANGUAGE SWITCH & RENDER ENGINE (ENGLISH + TAMIL)
+       ========================================================================= */
+
+    function setLanguage(lang) {
+      const prevLang = state.lang;
+      state.lang = lang === 'ta' ? 'ta' : 'en';
+      const prevI18n = LANG_I18N[prevLang];
+      const nextI18n = LANG_I18N[state.lang];
+
+      // Auto-swap default school/exam/subject/medium if user hasn't customized them
+      if (state.meta.school === prevI18n.defaultSchool) state.meta.school = nextI18n.defaultSchool;
+      if (state.meta.exam === prevI18n.defaultExam100) state.meta.exam = nextI18n.defaultExam100;
+      if (state.meta.exam === prevI18n.defaultExam50) state.meta.exam = nextI18n.defaultExam50;
+      if (state.meta.subject === prevI18n.defaultSubject) state.meta.subject = nextI18n.defaultSubject;
+      if (state.meta.medium === prevI18n.defaultMedium) state.meta.medium = nextI18n.defaultMedium;
+
+      syncInputs();
+      persistState();
+      renderAll();
+      showToast(state.lang === 'ta' ? 'தமிழ் வழி (Noto Serif Tamil) மாற்றப்பட்டது.' : 'Switched to English (Cambria Math / Times New Roman).', 'info');
+    }
+
+    function getActivePartsConfig() {
+      const i18n = LANG_I18N[state.lang] || LANG_I18N.en;
+      return state.pattern === 50 ? i18n.parts50 : i18n.parts100;
+    }
+
+    function renderAll() {
+      renderHeaderAndBadges();
+      renderPartTables();
+      renderSummaryCard();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function renderHeaderAndBadges() {
+      const i18n = LANG_I18N[state.lang] || LANG_I18N.en;
+      const sheet = document.getElementById('answer-key-sheet');
+      sheet.classList.toggle('exam-font-ta', state.lang === 'ta');
+      sheet.classList.toggle('exam-font-en', state.lang !== 'ta');
+
+      document.getElementById('preview-school').textContent = state.meta.school;
+      document.getElementById('preview-exam').textContent = state.meta.exam;
+      document.getElementById('preview-key-label').textContent = i18n.keyTitle;
+      document.getElementById('lbl-subject').textContent = i18n.subjectLbl;
+      document.getElementById('lbl-max-marks').textContent = i18n.maxMarksLbl;
+      document.getElementById('lbl-medium').textContent = i18n.mediumLbl;
+      document.getElementById('preview-subject').textContent = state.meta.subject;
+      document.getElementById('preview-medium').textContent = state.meta.medium;
+      document.getElementById('preview-max-marks').textContent = state.pattern;
+      document.getElementById('pattern-badge').textContent = `${state.pattern} Marks`;
+      document.getElementById('mobile-q-badge').textContent = state.questions.length;
+
+      // Toggle Button Active States
+      const isTa = state.lang === 'ta';
+      document.getElementById('btn-lang-en').className = !isTa ? 'px-2.5 py-1 rounded-md font-semibold bg-brand-600 text-white transition' : 'px-2.5 py-1 rounded-md font-semibold text-slate-300 hover:text-white transition';
+      document.getElementById('btn-lang-ta').className = isTa ? 'px-2.5 py-1 rounded-md font-semibold bg-amber-500 text-slate-950 transition' : 'px-2.5 py-1 rounded-md font-semibold text-slate-300 hover:text-white transition';
+
+      const is100 = state.pattern === 100;
+      document.getElementById('btn-mode-100').className = is100 ? 'px-2.5 py-1 rounded-md font-semibold bg-brand-600 text-white transition' : 'px-2.5 py-1 rounded-md font-semibold text-slate-300 hover:text-white transition';
+      document.getElementById('btn-mode-50').className = !is100 ? 'px-2.5 py-1 rounded-md font-semibold bg-emerald-600 text-white transition' : 'px-2.5 py-1 rounded-md font-semibold text-slate-300 hover:text-white transition';
+      document.getElementById('btn-side-100').className = is100 ? 'py-2 rounded-lg text-xs font-bold bg-brand-600 text-white border border-brand-700' : 'py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200';
+      document.getElementById('btn-side-50').className = !is100 ? 'py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white border border-emerald-700' : 'py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200';
+    }
+
+    function renderSummaryCard() {
+      const partsCfg = getActivePartsConfig();
+      document.getElementById('summary-total-pill').textContent = `${state.pattern} Marks`;
+      document.getElementById('part-summary-list').innerHTML = ['PART-I', 'PART-II', 'PART-III', 'PART-IV'].map(pk => {
+        const pCfg = partsCfg[pk];
+        const count = state.questions.filter(q => q.part === pk).length;
+        return `<div class="flex items-center justify-between py-1 border-b border-slate-800 last:border-none"><span class="font-semibold text-slate-200">${pCfg.title} <span class="text-slate-400 font-normal">(${count})</span></span><span class="font-bold text-amber-300">${pCfg.formula}</span></div>`;
+      }).join('');
+    }
+
+    function renderXyTableHtml(xy) {
+      if (!xy || !Array.isArray(xy.x)) return '';
+      const note = state.lang === 'ta' && xy.noteTa ? xy.noteTa : xy.note;
+      return `<div class="my-1.5 overflow-x-auto"><table class="xy-mini-table"><tr><th>X</th>${xy.x.map(v => `<td>${v}</td>`).join('')}</tr><tr><th>Y</th>${xy.y.map(v => `<td>${v}</td>`).join('')}</tr></table>${note ? `<div class="text-[11px] text-slate-600 italic">${escapeHtml(note)}</div>` : ''}</div>`;
+    }
+
+    function renderPartTables() {
+      const container = document.getElementById('parts-container');
+      const emptyState = document.getElementById('empty-state');
+      const i18n = LANG_I18N[state.lang] || LANG_I18N.en;
+      const partsCfg = getActivePartsConfig();
+      const qFilter = state.searchQuery.toLowerCase().trim();
+      const visibleParts = state.partFilter === 'ALL' ? ['PART-I', 'PART-II', 'PART-III', 'PART-IV'] : [state.partFilter];
+
+      let html = '';
+      let totalRendered = 0;
+
+      visibleParts.forEach(partKey => {
+        const pCfg = partsCfg[partKey];
+        const items = state.questions.filter(q => {
+          if (q.part !== partKey) return false;
+          if (!qFilter) return true;
+          return [q.qNo, q.question, q.keyAnswer, q.keyAnswerTa, ...(q.steps || []).map(s => s.text + ' ' + (s.textTa || ''))].join(' ').toLowerCase().includes(qFilter);
+        });
+        if (!items.length) return;
+        totalRendered += items.length;
+
+        html += `<div class="part-block">
+          <div class="text-center font-bold text-sm tracking-wide text-slate-900 uppercase mb-1">${pCfg.title}</div>
+          <div class="flex flex-wrap items-baseline justify-between gap-2 text-xs font-bold text-slate-900 mb-1.5">
+            <span>${pCfg.subtitle}</span><span class="font-bold">${pCfg.formula}</span>
+          </div>`;
+
+        if (partKey === 'PART-I') {
+          const [c1, c2, c3, c4] = i18n.colsP1;
+          html += `<div class="overflow-x-auto"><table class="dge-table text-[13px]">
+            <thead><tr><th style="width:12%">${c1}</th><th style="width:16%">${c2}</th><th style="width:54%" class="text-left">${c3}</th><th style="width:18%">${c4}</th></tr></thead>
+            <tbody>${items.map(q => {
+              const code = i18n.optMap[(q.optionCode || '(a)').toLowerCase()] || q.optionCode || '(a)';
+              const ansText = (state.lang === 'ta' && q.keyAnswerTa) ? q.keyAnswerTa : (q.keyAnswer || '');
+              return `<tr class="group">
+                <td class="text-center font-semibold text-slate-900">
+                  <div>${escapeHtml(q.qNo)}</div>
+                  <div class="no-print flex justify-center gap-1 mt-1 opacity-70 group-hover:opacity-100">
+                    <button type="button" data-action="edit" data-id="${q.id}" class="p-0.5 rounded bg-slate-100 hover:bg-brand-100 text-slate-600 hover:text-brand-700"><i data-lucide="pencil" class="w-3 h-3"></i></button>
+                    <button type="button" data-action="delete" data-id="${q.id}" class="p-0.5 rounded bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-700"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                  </div>
+                </td>
+                <td class="text-center font-semibold text-slate-900">${escapeHtml(code)}</td>
+                <td class="text-left text-slate-900">
+                  ${state.options.showQText && q.question ? `<div class="text-[11.5px] text-slate-500 mb-1">${formatForMathJax(q.question)}</div>` : ''}
+                  <div class="font-medium">${formatForMathJax(ansText)}</div>
+                </td>
+                <td class="text-center font-bold text-slate-900">${q.marks || 1}</td>
+              </tr>`;
+            }).join('')}</tbody></table></div>`;
+        } else {
+          const [c1, c2, c3, c4] = i18n.colsP2;
+          const showStepCol = state.options.showStepMarks;
+          html += `<div class="overflow-x-auto"><table class="dge-table text-[13px]">
+            <thead><tr><th style="width:11%">${c1}</th><th style="width:${showStepCol ? '63%' : '77%'}">${c2}</th>${showStepCol ? `<th style="width:13%">${c3}</th>` : ''}<th style="width:13%">${c4}</th></tr></thead>
+            <tbody>${items.map(q => {
+              const steps = q.steps || [];
+              return `<tr class="group">
+                <td class="text-center font-bold text-slate-900">
+                  <div>${escapeHtml(q.qNo)}</div>
+                  <div class="no-print flex justify-center gap-1 mt-1.5 opacity-70 group-hover:opacity-100">
+                    <button type="button" data-action="edit" data-id="${q.id}" class="p-1 rounded bg-slate-100 hover:bg-brand-100 text-slate-600 hover:text-brand-700"><i data-lucide="pencil" class="w-3 h-3"></i></button>
+                    <button type="button" data-action="delete" data-id="${q.id}" class="p-1 rounded bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-700"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                  </div>
+                </td>
+                <td class="text-slate-900">
+                  ${state.options.showQText && q.question ? `<div class="text-[11.5px] font-semibold text-brand-800 bg-brand-50/70 px-2 py-1 rounded mb-1.5">${formatForMathJax(q.question)}</div>` : ''}
+                  ${q.xyTable ? renderXyTableHtml(q.xyTable) : ''}
+                  <div class="space-y-1">${steps.map(st => {
+                    const lineTxt = (state.lang === 'ta' && st.textTa) ? st.textTa : st.text;
+                    return `<div class="leading-relaxed">${formatForMathJax(lineTxt)}</div>`;
+                  }).join('')}</div>
+                </td>
+                ${showStepCol ? `<td class="text-center font-semibold text-slate-800"><div class="space-y-1">${steps.map(st => `<div class="leading-relaxed">${st.mark}</div>`).join('')}</div></td>` : ''}
+                <td class="text-center align-middle font-bold text-slate-900 text-sm">${q.marks || pCfg.perQ}</td>
+              </tr>`;
+            }).join('')}</tbody></table></div>`;
+        }
+        html += `</div>`;
+      });
+
+      container.innerHTML = html;
+      emptyState.classList.toggle('hidden', totalRendered > 0);
+      typesetMathElements(container);
+    }
+
+    /* =========================================================================
+       A4 SAFE PRINT & DIRECT PDF DOWNLOAD (ZERO MARGIN CUT-OUT)
+       ========================================================================= */
+
+    async function printAnswerKey() {
+      const sheet = document.getElementById('answer-key-sheet');
+      const previewCol = document.getElementById('preview-column');
+      const wasHidden = previewCol.classList.contains('mobile-panel-hidden');
+      previewCol.classList.remove('mobile-panel-hidden');
+
+      showToast('Preparing A4 MathJax Print layout...', 'info');
+      await typesetMathElements(sheet);
+      setTimeout(() => {
+        window.print();
+        if (wasHidden) previewCol.classList.add('mobile-panel-hidden');
+      }, 200);
+    }
+
+    async function downloadDirectPdf() {
+      const sheet = document.getElementById('answer-key-sheet');
+      const previewCol = document.getElementById('preview-column');
+      const wasHidden = previewCol.classList.contains('mobile-panel-hidden');
+      previewCol.classList.remove('mobile-panel-hidden');
+
+      const filename = `Maths_${state.pattern}M_${state.lang.toUpperCase()}_Answer_Key.pdf`;
+      showToast('Generating A4 PDF with default 15mm margins...', 'info');
+      await typesetMathElements(sheet);
+
+      if (typeof html2pdf !== 'undefined') {
+        const noPrintEls = sheet.querySelectorAll('.no-print');
+        const prevWidth = sheet.style.width;
+        const prevMaxW = sheet.style.maxWidth;
+        const prevPad = sheet.style.padding;
+        const prevBorder = sheet.style.border;
+        const prevShadow = sheet.style.boxShadow;
+
+        // Lock exact A4 printable width (180mm ≈ 680px) so right margin NEVER cuts off!
+        noPrintEls.forEach(el => { el.dataset.prevDisplay = el.style.display; el.style.display = 'none'; });
+        sheet.style.width = '680px';
+        sheet.style.maxWidth = '680px';
+        sheet.style.padding = '0';
+        sheet.style.border = 'none';
+        sheet.style.boxShadow = 'none';
+
+        try {
+          await html2pdf().set({
+            margin: [15, 15, 15, 15], // Default A4 15mm margins on all 4 sides
+            filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, width: 680, windowWidth: 680, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+          }).from(sheet).save();
+          showToast(`Downloaded ${filename}`, 'success');
+        } catch (err) {
+          window.print();
+        } finally {
+          sheet.style.width = prevWidth;
+          sheet.style.maxWidth = prevMaxW;
+          sheet.style.padding = prevPad;
+          sheet.style.border = prevBorder;
+          sheet.style.boxShadow = prevShadow;
+          noPrintEls.forEach(el => { el.style.display = el.dataset.prevDisplay || ''; });
+          if (wasHidden) previewCol.classList.add('mobile-panel-hidden');
+        }
+      } else {
+        window.print();
+        if (wasHidden) previewCol.classList.add('mobile-panel-hidden');
+      }
+    }
+
+    async function exportStandaloneHtml() {
+      const sheet = document.getElementById('answer-key-sheet');
+      await typesetMathElements(sheet);
+      const clone = sheet.cloneNode(true);
+      clone.querySelectorAll('.no-print').forEach(el => el.remove());
+      const fontStack = state.lang === 'ta'
+        ? "'Noto Serif Tamil', 'Cambria Math', 'Times New Roman', serif"
+        : "'Cambria Math', 'Cambria', 'Times New Roman', Times, 'Noto Serif Tamil', serif";
+      const doc = `<!DOCTYPE html><html lang="${state.lang}"><head><meta charset="UTF-8"><title>${escapeHtml(state.meta.exam)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
+<style>@page{size:A4 portrait;margin:15mm}body{font-family:${fontStack};padding:12px;background:#fff;color:#000;font-size:11pt;line-height:1.45}.dge-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:16px}.dge-table th,.dge-table td{border:1px solid #000;padding:5px 7px;vertical-align:top;overflow-wrap:anywhere}.dge-table thead th{background:#f8fafc;font-weight:700;text-align:center}.xy-mini-table{border-collapse:collapse;margin:5px 0;font-size:10pt}.xy-mini-table td,.xy-mini-table th{border:1px solid #333;padding:2px 6px;text-align:center}mjx-container{display:inline-flex!important;align-items:center;vertical-align:middle;max-width:100%}mjx-container svg{max-width:100%;height:auto}@media print{body{padding:0}.dge-table tr{break-inside:avoid}}</style></head><body>${clone.innerHTML}</body></html>`;
+      const blob = new Blob([doc], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `Maths_${state.pattern}M_${state.lang.toUpperCase()}_Key.html`; a.click();
+      URL.revokeObjectURL(url);
+      showToast('Exported A4 print-ready HTML.', 'success');
+    }
+
+    function exportProjectJson() {
+      const blob = new Blob([JSON.stringify({ lang: state.lang, pattern: state.pattern, meta: state.meta, options: state.options, questions: state.questions }, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `maths-${state.pattern}m-${state.lang}-key.json`; a.click();
+      URL.revokeObjectURL(url);
+      showToast('Saved JSON project.', 'success');
+    }
+
+    /* =========================================================================
+       MODALS, PERSISTENCE & EVENTS
+       ========================================================================= */
+
+    function openHeaderModal() {
+      document.getElementById('hm-school').value = state.meta.school;
+      document.getElementById('hm-exam').value = state.meta.exam;
+      document.getElementById('hm-subject').value = state.meta.subject;
+      document.getElementById('hm-medium').value = state.meta.medium;
+      document.getElementById('hm-max-marks').value = String(state.pattern);
+      document.getElementById('header-modal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function saveHeaderModal() {
+      state.meta.school = document.getElementById('hm-school').value.trim() || 'School Name';
+      state.meta.exam = document.getElementById('hm-exam').value.trim() || 'Examination';
+      state.meta.subject = document.getElementById('hm-subject').value.trim() || 'MATHEMATICS';
+      state.meta.medium = document.getElementById('hm-medium').value.trim() || 'ENGLISH';
+      state.pattern = parseInt(document.getElementById('hm-max-marks').value, 10) || 100;
+      document.getElementById('header-modal').classList.add('hidden');
+      syncInputs(); persistState(); renderAll();
+      showToast('Header updated.', 'success');
+    }
+
+    function updateEditLiveMathJax() {
+      const part = document.getElementById('edit-part').value;
+      const box = document.getElementById('edit-live-mathjax');
+      if (part === 'PART-I') {
+        box.innerHTML = `<div class="text-[10px] font-bold uppercase text-emerald-700">Live MathJax Preview:</div><div>${formatForMathJax(document.getElementById('edit-key-ans').value)}</div>`;
+      } else {
+        const texts = Array.from(document.querySelectorAll('#edit-steps-list .st-text')).map(i => i.value);
+        box.innerHTML = `<div class="text-[10px] font-bold uppercase text-emerald-700">Live MathJax Preview:</div>` + texts.map(t => `<div>${formatForMathJax(t)}</div>`).join('');
+      }
+      typesetMathElements(box);
+    }
+
+    function renderEditSteps(steps) {
+      document.getElementById('edit-steps-list').innerHTML = steps.map(st => {
+        const val = (state.lang === 'ta' && st.textTa) ? st.textTa : st.text;
+        return `<div class="edit-step-row flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+          <input type="text" class="st-text flex-1 rounded border border-slate-300 px-2 py-1 text-xs bg-white" value="${escapeHtml(val)}" placeholder="Use $2x^2$, $\\dfrac{a}{b}$ for MathJax" />
+          <input type="number" step="0.5" min="0" class="st-mark w-16 rounded border border-slate-300 px-1.5 py-1 text-xs font-bold text-center bg-white" value="${st.mark}" />
+          <button type="button" class="btn-rm-step p-1 text-slate-400 hover:text-rose-600"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+        </div>`;
+      }).join('');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      updateEditLiveMathJax();
+    }
+
+    function toggleEditModalFields(part) {
+      const isMcq = part === 'PART-I';
+      document.getElementById('edit-mcq-fields').classList.toggle('hidden', !isMcq);
+      document.getElementById('edit-steps-wrap').classList.toggle('hidden', isMcq);
+      updateEditLiveMathJax();
+    }
+
+    function openEditModal(id) {
+      const q = state.questions.find(item => item.id === id);
+      if (!q) return;
+      state.editingId = id;
+      document.getElementById('edit-qno').value = q.qNo;
+      document.getElementById('edit-part').value = q.part;
+      document.getElementById('edit-total-marks').value = q.marks || 1;
+      document.getElementById('edit-question').value = q.question || '';
+      document.getElementById('edit-opt-code').value = q.optionCode || '(a)';
+      document.getElementById('edit-key-ans').value = (state.lang === 'ta' && q.keyAnswerTa) ? q.keyAnswerTa : (q.keyAnswer || '');
+      renderEditSteps(q.steps && q.steps.length ? q.steps : [{ text: '', mark: 1 }]);
+      toggleEditModalFields(q.part);
+      document.getElementById('edit-modal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function saveEditModal() {
+      const idx = state.questions.findIndex(item => item.id === state.editingId);
+      if (idx === -1) return;
+      const part = document.getElementById('edit-part').value;
+      const updated = {
+        ...state.questions[idx],
+        qNo: document.getElementById('edit-qno').value.trim() || state.questions[idx].qNo,
+        part,
+        marks: parseFloat(document.getElementById('edit-total-marks').value) || 1,
+        question: normalizeMathMode(document.getElementById('edit-question').value.trim())
+      };
+      if (part === 'PART-I') {
+        updated.optionCode = document.getElementById('edit-opt-code').value.trim() || '(a)';
+        const ans = normalizeMathMode(document.getElementById('edit-key-ans').value.trim());
+        if (state.lang === 'ta') updated.keyAnswerTa = ans; else updated.keyAnswer = ans;
+      } else {
+        const newSteps = [];
+        document.querySelectorAll('#edit-steps-list .edit-step-row').forEach(r => {
+          const t = normalizeMathMode(r.querySelector('.st-text').value.trim());
+          const m = parseFloat(r.querySelector('.st-mark').value) || 0;
+          if (t) newSteps.push(state.lang === 'ta' ? { text: t, textTa: t, mark: m } : { text: t, mark: m });
+        });
+        updated.steps = newSteps.length ? newSteps : [{ text: 'Answer', mark: updated.marks }];
+      }
+      state.questions[idx] = updated;
+      document.getElementById('edit-modal').classList.add('hidden');
+      state.editingId = null;
+      persistState(); renderAll();
+      showToast('Saved answer.', 'success');
+    }
+
+    function syncProviderUi() {
+      const meta = PROVIDER_META[state.provider];
+      document.getElementById('api-key-box').classList.toggle('hidden', !meta.needsKey);
+      document.getElementById('provider-hint').textContent = meta.hint;
+      document.getElementById('ai-api-key').value = state.apiKeys[state.provider] || '';
+      const pill = document.getElementById('engine-status-pill');
+      if (!meta.needsKey) { pill.textContent = 'Offline Ready'; pill.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300'; }
+      else if (getActiveKey()) { pill.textContent = meta.vision ? 'Vision AI Ready' : 'AI Ready'; pill.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300'; }
+      else { pill.textContent = 'Add API Key'; pill.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-300'; }
+    }
+
+    function loadPreset(type) {
+      const i18n = LANG_I18N[state.lang] || LANG_I18N.en;
+      if (type === 'model50') {
+        state.pattern = 50;
+        state.meta.exam = i18n.defaultExam50;
+        state.questions = build50MarkPreset().map(q => ({ ...q, id: uid() }));
+        showToast('Loaded 50-Mark Part-Wise Key (22 Qs).', 'success');
+      } else {
+        state.pattern = 100;
+        state.meta.exam = i18n.defaultExam100;
+        state.questions = PUBLIC_2026_100M.map(q => ({ ...q, id: uid() }));
+        showToast('Loaded 100-Mark Public Exam 2026 Key (44 Qs).', 'success');
+      }
+      syncInputs(); persistState(); renderAll();
+    }
+
+    function persistState() {
+      try {
+        localStorage.setItem('makb_pwa_v6', JSON.stringify({
+          lang: state.lang, pattern: state.pattern, provider: state.provider, apiKeys: state.apiKeys,
+          meta: state.meta, options: state.options, questions: state.questions
+        }));
+      } catch (e) {}
+    }
+
+    function loadPersistedState() {
+      try {
+        const raw = localStorage.getItem('makb_pwa_v6');
+        if (raw) {
+          const saved = JSON.parse(raw);
+          if (saved.lang) state.lang = saved.lang;
+          if (saved.pattern) state.pattern = saved.pattern;
+          if (saved.provider) state.provider = saved.provider;
+          if (saved.apiKeys) state.apiKeys = saved.apiKeys;
+          if (saved.meta) state.meta = { ...state.meta, ...saved.meta };
+          if (saved.options) state.options = { ...state.options, ...saved.options };
+          if (Array.isArray(saved.questions) && saved.questions.length > 0) { state.questions = saved.questions; return true; }
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    function syncInputs() {
+      document.getElementById('ai-provider').value = state.provider;
+      document.getElementById('meta-school').value = state.meta.school;
+      document.getElementById('meta-exam').value = state.meta.exam;
+      document.getElementById('meta-subject').value = state.meta.subject;
+      document.getElementById('meta-medium').value = state.meta.medium;
+      document.getElementById('opt-show-qtext').checked = state.options.showQText;
+      document.getElementById('opt-show-step-marks').checked = state.options.showStepMarks;
+      syncProviderUi();
+    }
+
+    function bindEvents() {
+      // PWA Install Button
+      document.getElementById('btn-install-pwa').addEventListener('click', async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        document.getElementById('btn-install-pwa').classList.add('hidden');
+      });
+
+      // Language Toggle (English / Tamil)
+      document.getElementById('btn-lang-en').addEventListener('click', () => setLanguage('en'));
+      document.getElementById('btn-lang-ta').addEventListener('click', () => setLanguage('ta'));
+
+      // Provider
+      document.getElementById('ai-provider').addEventListener('change', e => { state.provider = e.target.value; syncProviderUi(); persistState(); });
+      document.getElementById('btn-save-key').addEventListener('click', () => { state.apiKeys[state.provider] = document.getElementById('ai-api-key').value.trim(); syncProviderUi(); persistState(); showToast('API Key saved.', 'success'); });
+
+      // Panel Tabs
+      document.querySelectorAll('.panel-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.panelTab;
+          document.querySelectorAll('.panel-tab-btn').forEach(b => { b.classList.remove('border-brand-600', 'text-brand-700', 'bg-white'); b.classList.add('border-transparent', 'text-slate-600'); });
+          btn.classList.add('border-brand-600', 'text-brand-700', 'bg-white'); btn.classList.remove('border-transparent', 'text-slate-600');
+          ['upload', 'add', 'settings'].forEach(t => document.getElementById(`tab-content-${t}`).classList.toggle('hidden', t !== tab));
+        });
+      });
+
+      // Mobile Switcher
+      const mB = document.getElementById('mobile-tab-builder'), mP = document.getElementById('mobile-tab-preview');
+      const cB = document.getElementById('builder-column'), cP = document.getElementById('preview-column');
+      mB.addEventListener('click', () => {
+        cB.classList.remove('mobile-panel-hidden'); cP.classList.add('mobile-panel-hidden');
+        mB.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-brand-600 text-white transition';
+        mP.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 transition';
+      });
+      mP.addEventListener('click', () => {
+        cB.classList.add('mobile-panel-hidden'); cP.classList.remove('mobile-panel-hidden');
+        mP.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-brand-600 text-white transition';
+        mB.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 transition';
+      });
+
+      document.getElementById('btn-mode-100').addEventListener('click', () => loadPreset('public100'));
+      document.getElementById('btn-mode-50').addEventListener('click', () => loadPreset('model50'));
+      document.getElementById('btn-side-100').addEventListener('click', () => loadPreset('public100'));
+      document.getElementById('btn-side-50').addEventListener('click', () => loadPreset('model50'));
+      document.querySelectorAll('.sample-btn').forEach(btn => btn.addEventListener('click', () => loadPreset(btn.dataset.sample)));
+
+      const dz = document.getElementById('drop-zone'), fi = document.getElementById('file-input');
+      document.getElementById('btn-browse-file').addEventListener('click', e => { e.stopPropagation(); fi.click(); });
+      dz.addEventListener('click', () => fi.click());
+      dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('border-brand-600', 'bg-brand-100/50'); });
+      dz.addEventListener('dragleave', () => dz.classList.remove('border-brand-600', 'bg-brand-100/50'));
+      dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('border-brand-600', 'bg-brand-100/50'); if (e.dataTransfer.files?.length) addFilesToQueue(e.dataTransfer.files); });
+      fi.addEventListener('change', e => { if (e.target.files?.length) { addFilesToQueue(e.target.files); e.target.value = ''; } });
+
+      document.getElementById('page-queue-list').addEventListener('click', e => {
+        const rm = e.target.closest('button[data-rm-page]');
+        if (!rm) return;
+        state.pageQueue = state.pageQueue.filter(p => p.id !== rm.dataset.rmPage);
+        renderPageQueue();
+      });
+      document.getElementById('btn-clear-queue').addEventListener('click', e => { e.stopPropagation(); state.pageQueue = []; renderPageQueue(); });
+      document.getElementById('btn-process-queue').addEventListener('click', processPageQueue);
+
+      document.getElementById('btn-fix-math-mode').addEventListener('click', () => {
+        const box = document.getElementById('raw-paper-input');
+        box.value = normalizeMathMode(box.value); updateMathPreview();
+        showToast('Converted equations to MathJax Mode.', 'success');
+      });
+      document.getElementById('raw-paper-input').addEventListener('input', updateMathPreview);
+      document.getElementById('btn-clear-raw').addEventListener('click', () => { document.getElementById('raw-paper-input').value = ''; updateMathPreview(); });
+      document.getElementById('btn-extract-solve').addEventListener('click', () => processRawPaper(document.getElementById('raw-paper-input').value, false));
+      document.getElementById('btn-append-solve').addEventListener('click', () => processRawPaper(document.getElementById('raw-paper-input').value, true));
+
+      document.getElementById('btn-add-single-q').addEventListener('click', () => {
+        const text = normalizeMathMode(document.getElementById('add-question-text').value.trim());
+        if (!text) { showToast('Enter a maths question first.', 'warning'); return; }
+        const part = document.getElementById('add-part').value;
+        const qNo = document.getElementById('add-qno').value.trim() || String(state.questions.length + 1);
+        const solved = autoSolveForPart(text, part);
+        state.questions.push({ id: uid(), part, qNo: part === 'PART-I' && !qNo.endsWith('.') ? `${qNo}.` : qNo, question: text, ...solved });
+        document.getElementById('add-question-text').value = ''; document.getElementById('add-qno').value = '';
+        persistState(); renderAll(); showToast(`Added Q.${qNo}.`, 'success');
+      });
+
+      [['meta-school', 'school'], ['meta-exam', 'exam'], ['meta-subject', 'subject'], ['meta-medium', 'medium']].forEach(([id, key]) => {
+        document.getElementById(id).addEventListener('input', e => { state.meta[key] = e.target.value; persistState(); renderHeaderAndBadges(); });
+      });
+      document.getElementById('opt-show-qtext').addEventListener('change', e => { state.options.showQText = e.target.checked; persistState(); renderPartTables(); if (typeof lucide !== 'undefined') lucide.createIcons(); });
+      document.getElementById('opt-show-step-marks').addEventListener('change', e => { state.options.showStepMarks = e.target.checked; persistState(); renderPartTables(); if (typeof lucide !== 'undefined') lucide.createIcons(); });
+
+      document.querySelectorAll('.part-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.partFilter = btn.dataset.partFilter;
+          document.querySelectorAll('.part-filter-btn').forEach(b => b.className = 'part-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition');
+          btn.className = 'part-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900 text-white transition';
+          renderPartTables(); if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+      });
+      document.getElementById('search-questions').addEventListener('input', e => { state.searchQuery = e.target.value; renderPartTables(); if (typeof lucide !== 'undefined') lucide.createIcons(); });
+
+      document.getElementById('parts-container').addEventListener('click', e => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        if (btn.dataset.action === 'edit') openEditModal(id);
+        else if (btn.dataset.action === 'delete') {
+          openConfirm('Delete Question', 'Remove this row from the Answer Key?', () => {
+            state.questions = state.questions.filter(q => q.id !== id);
+            persistState(); renderAll(); showToast('Row deleted.', 'info');
+          });
+        }
+      });
+      document.getElementById('btn-clear-all').addEventListener('click', () => {
+        openConfirm('Reset Answer Key', 'Clear all questions from the Answer Key?', () => { state.questions = []; persistState(); renderAll(); });
+      });
+
+      document.getElementById('btn-top-edit-header').addEventListener('click', openHeaderModal);
+      document.getElementById('btn-sheet-edit-header').addEventListener('click', openHeaderModal);
+      document.getElementById('btn-close-header-modal').addEventListener('click', () => document.getElementById('header-modal').classList.add('hidden'));
+      document.getElementById('btn-cancel-header-modal').addEventListener('click', () => document.getElementById('header-modal').classList.add('hidden'));
+      document.getElementById('btn-save-header-modal').addEventListener('click', saveHeaderModal);
+
+      document.getElementById('edit-part').addEventListener('change', e => toggleEditModalFields(e.target.value));
+      document.getElementById('edit-key-ans').addEventListener('input', updateEditLiveMathJax);
+      document.getElementById('edit-steps-list').addEventListener('input', updateEditLiveMathJax);
+      document.getElementById('btn-close-modal').addEventListener('click', () => document.getElementById('edit-modal').classList.add('hidden'));
+      document.getElementById('btn-cancel-modal').addEventListener('click', () => document.getElementById('edit-modal').classList.add('hidden'));
+      document.getElementById('btn-save-modal').addEventListener('click', saveEditModal);
+      document.getElementById('btn-modal-add-step').addEventListener('click', () => {
+        const cur = Array.from(document.querySelectorAll('#edit-steps-list .edit-step-row')).map(r => ({ text: r.querySelector('.st-text').value, mark: parseFloat(r.querySelector('.st-mark').value) || 1 }));
+        cur.push({ text: '', mark: 1 }); renderEditSteps(cur);
+      });
+      document.getElementById('edit-steps-list').addEventListener('click', e => {
+        const rm = e.target.closest('.btn-rm-step');
+        if (rm && document.querySelectorAll('#edit-steps-list .edit-step-row').length > 1) { rm.closest('.edit-step-row').remove(); updateEditLiveMathJax(); }
+      });
+
+      document.getElementById('confirm-cancel-btn').addEventListener('click', () => { document.getElementById('confirm-modal').classList.add('hidden'); confirmCallback = null; });
+      document.getElementById('confirm-ok-btn').addEventListener('click', () => { document.getElementById('confirm-modal').classList.add('hidden'); if (typeof confirmCallback === 'function') confirmCallback(); confirmCallback = null; });
+
+      document.getElementById('btn-print-key').addEventListener('click', printAnswerKey);
+      document.getElementById('btn-download-pdf').addEventListener('click', downloadDirectPdf);
+      document.getElementById('btn-export-html').addEventListener('click', exportStandaloneHtml);
+      document.getElementById('btn-export-json').addEventListener('click', exportProjectJson);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      bindEvents();
+      const restored = loadPersistedState();
+      if (restored) { syncInputs(); renderAll(); }
+      else { loadPreset('public100'); }
+    });
+  </script>
+</body>
+</html>
